@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAVAGE ERA — GUILD HUB</title>
+<meta name="description" content="RAVAGE ERA Guild Hub — the official community hub for the RAVAGE ERA Free Fire guild. We Stand United.">
+<meta name="theme-color" content="#06070a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2306070a'/%3E%3Ctext x='32' y='42' font-family='Arial' font-size='26' font-weight='900' fill='%23f5c542' text-anchor='middle'%3ERE%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ BOOT SEQUENCE ============ -->
+<div class="boot" id="boot" aria-hidden="true">
+  <div class="boot-emblem">RE</div>
+  <div class="boot-log" id="bootLog"></div>
+  <button class="btn btn-ghost btn-sm" id="bootSkip" type="button">SKIP ➤</button>
+</div>
+
+<!-- Particles background -->
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-badge">RE</div>
+      <div class="brand-text">
+        <strong>RAVAGE ERA</strong>
+        <span>GUILD HUB</span>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <a class="nav-link" href="#/home" data-nav="home"><span class="nav-num">00</span>HOME</a>
+      <a class="nav-link" href="#/tryouts" data-nav="tryouts"><span class="nav-num">01</span>TRYOUTS</a>
+      <a class="nav-link" href="#/guild" data-nav="guild"><span class="nav-num">02</span>GUILD</a>
+      <a class="nav-link" href="#/admins" data-nav="admins"><span class="nav-num">03</span>ADMINS</a>
+      <a class="nav-link" href="#/spin" data-nav="spin"><span class="nav-num">04</span>SPIN &amp; WIN</a>
+      <a class="nav-link" href="#/likes" data-nav="likes"><span class="nav-num">05</span>LIKES &amp; VISITS</a>
+      <a class="nav-link" href="#/sensi" data-nav="sensi"><span class="nav-num">06</span>SENSI</a>
+      <a class="nav-link" href="#/gallery" data-nav="gallery"><span class="nav-num">07</span>GALLERY</a>
+      <a class="nav-link" href="#/contact" data-nav="contact"><span class="nav-num">08</span>CONTACT</a>
+    </nav>
+    <div class="side-foot">
+      <p>BUILT BY EMMEX / ZEUS</p>
+      <p class="side-tag">“WE STAND UNITED.”</p>
+    </div>
+  </aside>
+  <div class="nav-backdrop" id="navBackdrop"></div>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main-wrap">
+
+    <!-- Topbar (mobile) -->
+    <header class="topbar">
+      <button class="hamburger" id="btnMenu" type="button" aria-label="Open menu"><span></span><span></span><span></span></button>
+      <div class="topbar-brand"><strong>RE</strong> GUILD HUB</div>
+    </header>
+
+    <main class="pages">
+
+      <!-- ================= HOME ================= -->
+      <section class="page" id="page-home" data-page="home">
+        <div class="page-inner">
+          <div class="panel hero-panel">
+            <span class="hero-tag">COMMUNITY DASHBOARD</span>
+            <h1>RAVAGE ERA</h1>
+            <h2>GUILD HUB</h2>
+            <p class="hero-desc">Built by warriors. United by RAVAGE. Welcome to the official community hub.</p>
+          </div>
+          <div class="stats-grid" id="statsGrid"></div>
+          <div class="menu-grid" id="menuGrid"></div>
+          <div class="panel">
+            <div class="panel-head"><h3>GUILD ANNOUNCEMENTS</h3><span class="step-label">LIVE FEED</span></div>
+            <div class="announce-list" id="announceList"></div>
+          </div>
+          <div class="dash-grid">
+            <div class="panel">
+              <div class="panel-head"><h3>NEXT DROP</h3><span class="step-label">TIMER</span></div>
+              <p class="dash-sub">GUILD TOURNAMENT · 5:30 PM WAT</p>
+              <div class="countdown" id="countdown"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h3>MVP OF THE WEEK</h3><span class="step-label">HONOR ROLL</span></div>
+              <div class="mvp-card" id="mvpCard"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>SQUAD ROLE PROFILE</h3><span class="step-label">PLAYSTYLE</span></div>
+            <div class="bars" id="roleBars"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TRYOUTS ================= -->
+      <section class="page" id="page-tryouts" data-page="tryouts">
+        <div class="page-inner">
+          <div class="page-head"><a class="page-back" href="#/home">← HOME</a><span class="page-tag">GUILD RECRUITMENT PORTAL</span></div>
+          <div class="panel hero-panel">
+            <h1>GUILD TRYOUTS</h1>
+            <h2>JOIN RAVAGE ERA</h2>
+            <p class="hero-desc">Think you have what it takes? Submit your details and our administrators will review your application.</p>
+          </div>
+          <div class="panel form-panel">
+            <div class="panel-head"><h3>TRYOUT APPLICATION</h3><span class="step-label">FORM</span></div>
+            <form id="tryoutForm" novalidate>
+              <div class="field"><label for="tIgn">IN-GAME NAME <i>*</i></label><input type="text" id="tIgn" placeholder="Your IGN" autocomplete="off"><small class="err" id="errTIgn"></small></div>
+              <div class="field"><label for="tUid">FREE FIRE UID <i>*</i></label><input type="text" id="tUid" placeholder="Your UID" autocomplete="off"><small class="err" id="errTUid"></small></div>
+              <div class="field"><label for="tAge">AGE <i>*</i></label><input type="text" id="tAge" placeholder="Your age" autocomplete="off"><small class="err" id="errTAge"></small></div>
+              <div class="field"><label for="tRegion">REGION <i>*</i></label><input type="text" id="tRegion" placeholder="e.g. Nigeria" autocomplete="off"><small class="err" id="errTRegion"></small></div>
+              <div class="field"><label for="tStyle">PLAYSTYLE <i>*</i></label>
+                <select id="tStyle">
+                  <option value="">Select playstyle</option>
+                  <option>RUSHER</option><option>SUPPORT</option><option>SNIPER</option><option>LEADER</option>
+                </select>
+                <small class="err" id="errTStyle"></small>
+              </div>
+              <div class="field"><label for="tAdmin">PREFERRED ADMIN <i>*</i></label>
+                <select id="tAdmin"></select>
+                <small class="err" id="errTAdmin"></small>
+              </div>
+              <div class="form-actions"><button type="submit" class="btn btn-gold btn-block" id="btnTryoutSubmit">SUBMIT APPLICATION ➤</button></div>
+              <small class="hint">Opens WhatsApp with your application pre-filled — press Send there.</small>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= GUILD ================= -->
+      <section class="page" id="page-guild" data-page="guild">
+        <div class="page-inner">
+          <div class="page-head"><a class="page-back" href="#/home">← HOME</a><span class="page-tag">ABOUT</span></div>
+          <div class="panel hero-panel">
+            <h1>THE GUILD</h1>
+            <h2>RAVAGE ERA</h2>
+            <p class="hero-desc">A competitive Free Fire guild built around teamwork, loyalty, skill, respect and consistency.</p>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>OUR STORY</h3><span class="step-label">TIMELINE</span></div>
+            <div class="timeline">
+              <div class="tl-item"><span class="tl-date">MARCH 2025</span><p>The vision was born — RAVAGE ERA was founded.</p></div>
+              <div class="tl-item"><span class="tl-date">YEAR ONE</span><p>Recruitment opened and warriors joined from everywhere. The guild grew into a real community.</p></div>
+              <div class="tl-item"><span class="tl-date">TODAY</span><p>48 warriors strong, 5,000+ matches across BR, Clash Squad and guild wars — and we keep climbing.</p></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>SQUAD ROLE PROFILE</h3><span class="step-label">PLAYSTYLE</span></div>
+            <div class="bars" id="guildBars"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ADMINS ================= -->
+      <section class="page" id="page-admins" data-page="admins">
+        <div class="page-inner">
+          <div class="page-head"><a class="page-back" href="#/home">← HOME</a><span class="page-tag">LEADERSHIP</span></div>
+          <div class="panel hero-panel">
+            <h1>MEET THE ADMINS</h1>
+            <h2>RAVAGE ERA LEADERSHIP</h2>
+            <p class="hero-desc">The administrators who guide, protect and represent the RAVAGE ERA community.</p>
+          </div>
+          <div class="admin-grid" id="adminGrid"></div>
+        </div>
+      </section>
+
+      <!-- ================= SPIN & WIN ================= -->
+      <section class="page" id="page-spin" data-page="spin">
+        <div class="page-inner">
+          <div class="page-head"><a class="page-back" href="#/home">← HOME</a><span class="page-tag">COMMUNITY PROMOTION</span></div>
+          <div class="panel hero-panel">
+            <h1>SPIN &amp; WIN</h1>
+            <h2>RAVAGE ERA REWARD WHEEL</h2>
+            <p class="hero-desc">Community promotion · ₦4,000 / $2</p>
+          </div>
+
+          <!-- GATE -->
+          <div class="panel form-panel" id="spinGate">
+            <div class="panel-head"><h3>SPIN ACCESS</h3><span class="step-label">ACCESS GATE</span></div>
+            <form id="spinGateForm" novalidate>
+              <div class="field"><label for="spinUid">FREE FIRE UID <i>*</i></label><input type="text" id="spinUid" placeholder="Your UID" autocomplete="off"><small class="err" id="errSpinUid"></small></div>
+              <div class="field"><label for="spinCode">SECRET CODE <i>*</i></label><input type="password" id="spinCode" placeholder="••••••" autocomplete="off"><small class="err" id="errSpinCode"></small></div>
+              <div class="form-actions"><button type="submit" class="btn btn-gold btn-block">UNLOCK THE WHEEL ➤</button></div>
+              <small class="hint">Simple client-side access gate. Wrong code? Contact Zeus web dev.</small>
+            </form>
+          </div>
+
+          <!-- WHEEL -->
+          <div class="panel wheel-panel" id="spinStage" hidden>
+            <div class="panel-head"><h3>SPIN THE WHEEL</h3><span class="step-label">LUCK TIME</span></div>
+            <div class="wheel-wrap">
+              <canvas id="wheelCanvas" width="320" height="320"></canvas>
+              <div class="wheel-pointer"></div>
+            </div>
+            <div class="wheel-legend">
+              <span class="lg lg-gold">GUN SKIN</span>
+              <span class="lg lg-dark">NOTHING</span>
+            </div>
+            <button class="btn btn-gold btn-block" id="btnSpin">SPIN ➤</button>
+            <p class="spin-result" id="spinResult"></p>
+            <small class="hint">Rewards are delivered by the RAVAGE ERA web developer / admin.</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= LIKES & VISITS ================= -->
+      <section class="page" id="page-likes" data-page="likes">
+        <div class="page-inner">
+          <div class="page-head"><a class="page-back" href="#/home">← HOME</a><span class="page-tag">COMMUNITY SERVICE</span></div>
+          <div class="panel hero-panel">
+            <h1>LIKES &amp; VISITS</h1>
+            <h2>PROFILE VISITS &amp; LIKES</h2>
+            <p class="hero-desc">FREE FIRE community service — handled by the RAVAGE ERA web developer / admin.</p>
+          </div>
+
+          <!-- GATE -->
+          <div class="panel form-panel" id="likesGate">
+            <div class="panel-head"><h3>REQUEST ACCESS</h3><span class="step-label">UNLOCK</span></div>
+            <form id="likesGateForm" novalidate>
+              <div class="field"><label for="likesUid">FREE FIRE UID <i>*</i></label><input type="text" id="likesUid" placeholder="Your UID" autocomplete="off"><small class="err" id="errLikesUid"></small></div>
+              <div class="field"><label for="likesCode">SECRET CODE <i>*</i></label><input type="password" id="likesCode" placeholder="••••••" autocomplete="off"><small class="err" id="errLikesCode"></small></div>
+              <div class="form-actions"><button type="submit" class="btn btn-gold btn-block">UNLOCK ➤</button></div>
+              <small class="hint">Simple client-side access gate. Wrong code? Contact Zeus web dev.</small>
+            </form>
+          </div>
+
+          <!-- FORM -->
+          <div class="panel form-panel" id="likesStage" hidden>
+            <div class="panel-head"><h3>LIKES &amp; PROFILE VISITS</h3><span class="step-label">MIN 10 · MAX 100</span></div>
+            <form id="likesForm" novalidate>
+              <div class="field"><label>FREE FIRE UID</label><input type="text" id="likesUidFinal" readonly></div>
+              <div class="field">
+                <label>LIKES — <b id="likesVal">50</b></label>
+                <input type="range" id="likesRange" min="10" max="100" step="1" value="50">
+                <div class="range-ends"><span>10 MIN</span><span>100 MAX</span></div>
+              </div>
+              <div class="field">
+                <label>PROFILE VISITS — <b id="visitsVal">50</b></label>
+                <input type="range" id="visitsRange" min="10" max="100" step="1" value="50">
+                <div class="range-ends"><span>10 MIN</span><span>100 MAX</span></div>
+              </div>
+              <div class="form-actions"><button type="submit" class="btn btn-gold btn-block" id="btnLikesSubmit">SUBMIT REQUEST ➤</button></div>
+              <small class="hint">Your request is submitted to the RAVAGE ERA web developer / admin for handling.</small>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SENSI ================= -->
+      <section class="page" id="page-sensi" data-page="sensi">
+        <div class="page-inner">
+          <div class="page-head"><a class="page-back" href="#/home">← HOME</a><span class="page-tag">SETTINGS</span></div>
+          <div class="panel hero-panel">
+            <h1>SENSI</h1>
+            <h2>SENSI CONFIGURATION</h2>
+            <p class="hero-desc">Build your perfect Free Fire sensitivity profile — step by step.</p>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 id="sensiTitle">STEP 1 / 5 — SELECT PHONE TYPE</h3><span class="step-label" id="sensiStepLabel">PHONE</span></div>
+
+            <!-- STEP 1 : PHONE TYPE -->
+            <div class="sensi-step" id="sensiStepPhone">
+              <p class="step-info">Choose your phone brand.</p>
+              <div class="opt-grid" id="phoneGrid"></div>
+            </div>
+
+            <!-- STEP 2 : FULL NAME -->
+            <div class="sensi-step hidden" id="sensiStepName">
+              <div class="field">
+                <label for="phoneName">PHONE FULL NAME <i>*</i></label>
+                <input type="text" id="phoneName" placeholder="e.g. iPhone 13 Pro Max, Tecno Camon 20..." autocomplete="off">
+                <small class="err" id="errPhoneName"></small>
+              </div>
+              <div class="wizard-actions"><button class="btn btn-ghost" data-back="0" type="button">← BACK</button><button class="btn btn-gold" id="btnSensiName" type="button">CONTINUE ➤</button></div>
+            </div>
+
+            <!-- STEP 3 : FINGERS -->
+            <div class="sensi-step hidden" id="sensiStepFingers">
+              <p class="step-info">How many fingers do you use?</p>
+              <div class="opt-grid" id="fingerGrid"></div>
+              <div class="wizard-actions"><button class="btn btn-ghost" data-back="1" type="button">← BACK</button></div>
+            </div>
+
+            <!-- STEP 4 : DPI -->
+            <div class="sensi-step hidden" id="sensiStepDpi">
+              <p class="step-info">Choose your DPI level.</p>
+              <div class="opt-grid" id="dpiGrid"></div>
+              <div class="wizard-actions"><button class="btn btn-ghost" data-back="2" type="button">← BACK</button></div>
+            </div>
+
+            <!-- STEP 5 : PIN -->
+            <div class="sensi-step hidden" id="sensiStepPin">
+              <div class="field">
+                <label for="sensiPin">ENTER PIN <i>*</i></label>
+                <input type="password" id="sensiPin" inputmode="numeric" placeholder="••••••" autocomplete="off">
+                <small class="err" id="errSensiPin"></small>
+                <small class="hint">Wrong pin? Contact the owner for the correct pin.</small>
+              </div>
+              <div class="wizard-actions"><button class="btn btn-ghost" data-back="3" type="button">← BACK</button><button class="btn btn-gold" id="btnSensiPin" type="button">UNLOCK SENSI ➤</button></div>
+            </div>
+
+            <!-- STEP 6 : RESULT -->
+            <div class="sensi-step hidden" id="sensiStepResult">
+              <div class="sensi-summary" id="sensiSummary"></div>
+              <div class="sensi-config" id="sensiConfig"></div>
+              <div class="wizard-actions"><button class="btn btn-ghost" id="btnSensiRestart" type="button">RESTART</button><button class="btn btn-gold" id="btnSensiDone" type="button">DONE ✓</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= GALLERY ================= -->
+      <section class="page" id="page-gallery" data-page="gallery">
+        <div class="page-inner">
+          <div class="page-head"><a class="page-back" href="#/home">← HOME</a><span class="page-tag">MEDIA</span></div>
+          <div class="panel hero-panel">
+            <h1>GALLERY</h1>
+            <h2>RAVAGE ERA PROFILES</h2>
+            <p class="hero-desc">Showcase cards from the RAVAGE ERA community.</p>
+          </div>
+          <div class="gallery-main">
+            <button class="gal-btn" id="btnGalPrev" type="button">‹</button>
+            <div class="gal-frame">
+              <img id="galMain" alt="RAVAGE ERA gallery">
+              <span class="gal-counter" id="galCounter">1 / 8</span>
+            </div>
+            <button class="gal-btn" id="btnGalNext" type="button">›</button>
+            <button class="gal-btn gal-full" id="btnGalFull" type="button">⛶</button>
+          </div>
+          <div class="gal-thumbs" id="galThumbs"></div>
+        </div>
+      </section>
+
+      <!-- ================= CONTACT ================= -->
+      <section class="page" id="page-contact" data-page="contact">
+        <div class="page-inner">
+          <div class="page-head"><a class="page-back" href="#/home">← HOME</a><span class="page-tag">SUPPORT</span></div>
+          <div class="panel hero-panel">
+            <h1>CONTACT</h1>
+            <h2>RAVAGE ERA</h2>
+            <p class="hero-desc">Questions, queries or support — reach the guild your way.</p>
+          </div>
+          <div class="contact-grid">
+            <div class="panel form-panel">
+              <div class="panel-head"><h3>OPTION A — EMAIL</h3><span class="step-label">MAIL</span></div>
+              <form id="emailForm" novalidate>
+                <div class="field"><label for="cName">NAME <i>*</i></label><input type="text" id="cName" placeholder="Your name" autocomplete="off"><small class="err" id="errCName"></small></div>
+                <div class="field"><label for="cEmail">EMAIL <i>*</i></label><input type="email" id="cEmail" placeholder="Your email" autocomplete="off"><small class="err" id="errCEmail"></small></div>
+                <div class="field"><label for="cMessage">MESSAGE <i>*</i></label><textarea id="cMessage" rows="5" placeholder="Your message"></textarea><small class="err" id="errCMessage"></small></div>
+                <div class="form-actions"><button type="submit" class="btn btn-gold btn-block">SEND QUERY</button></div>
+                <small class="hint">Opens your email app with the message pre-filled (static site — no server email).</small>
+              </form>
+            </div>
+            <div class="panel form-panel">
+              <div class="panel-head"><h3>OPTION B — WHATSAPP</h3><span class="step-label">WA</span></div>
+              <form id="waForm" novalidate>
+                <div class="field"><label for="wName">NAME <i>*</i></label><input type="text" id="wName" placeholder="Your name" autocomplete="off"><small class="err" id="errWName"></small></div>
+                <div class="field"><label for="wPhone">PHONE NUMBER <i>*</i></label><input type="tel" id="wPhone" placeholder="Your phone number" autocomplete="off"><small class="err" id="errWPhone"></small></div>
+                <div class="field"><label for="wMessage">MESSAGE <i>*</i></label><textarea id="wMessage" rows="5" placeholder="Your message"></textarea><small class="err" id="errWMessage"></small></div>
+                <div class="form-actions"><button type="submit" class="btn btn-red btn-block">CONTACT ZEUS ON WHATSAPP</button></div>
+                <small class="hint">Opens WhatsApp with your message pre-filled — press Send there.</small>
+              </form>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>QUICK ANSWERS</h3><span class="step-label">FAQ</span></div>
+            <div class="faq" id="faqList"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-foot">
+      <p><strong>RAVAGE ERA GUILD HUB</strong> · “We Stand United.”</p>
+      <p>Built by <a href="https://wa.me/2349066760078" target="_blank" rel="noopener">EMMEX / ZEUS</a> — Web Developer · <a href="mailto:ge5853987@gmail.com">ge5853987@gmail.com</a></p>
+      <p class="foot-note">Fan-made community platform. Free Fire is a trademark of Garena. Not affiliated with or endorsed by Garena.</p>
+    </footer>
+
+  </div>
+</div>
+
+<!-- ============ FLOATING JOIN BUTTON ============ -->
+<a class="float-btn" href="#/tryouts">JOIN THE SQUAD</a>
+
+<!-- ============ MODALS ============ -->
+
+<!-- Spin result -->
+<div class="modal" id="modalSpin" role="dialog" aria-modal="true">
+  <div class="modal-card panel">
+    <div class="modal-check" id="spinModalCheck">✔</div>
+    <h3 id="spinModalTitle" class="glow-gold">RESULT</h3>
+    <div id="spinModalBody">
+      <p class="modal-main" id="spinModalText">—</p>
+      <p class="modal-quote">Your reward will enter your account within <b>2 to 5 hours</b>.</p>
+    </div>
+    <div id="spinModalThanks" hidden>
+      <p>Thanks for spinning with RAVAGE ERA!</p>
+      <p class="modal-quote">“We Stand United.”</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" id="btnSpinModalNext" type="button">CONTINUE ➤</button>
+      <button class="btn btn-ghost" id="btnSpinModalClose" type="button" hidden>CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Likes result -->
+<div class="modal" id="modalLikes" role="dialog" aria-modal="true">
+  <div class="modal-card panel">
+    <div class="modal-check">✔</div>
+    <h3 class="glow-gold">REQUEST SUBMITTED</h3>
+    <div id="likesModalBody">
+      <p class="modal-main" id="likesModalText">—</p>
+      <p class="modal-quote">Your likes &amp; visits will enter within <b>2 to 5 hours</b>.</p>
+    </div>
+    <div id="likesModalThanks" hidden>
+      <p>Thanks for using the RAVAGE ERA community service!</p>
+      <p class="modal-quote">“We Stand United.”</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" id="btnLikesModalNext" type="button">CONTINUE ➤</button>
+      <button class="btn btn-ghost" id="btnLikesModalClose" type="button" hidden>CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Wrong code -->
+<div class="modal" id="modalWrongCode" role="dialog" aria-modal="true">
+  <div class="modal-card panel">
+    <div class="modal-check modal-check-red">✕</div>
+    <h3 class="glow-red">INVALID SECRET CODE</h3>
+    <p>The code you entered is incorrect.</p>
+    <p class="modal-quote">Contact <b>Zeus web dev</b> on WhatsApp to get the correct code.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btnWrongCodeClose" type="button">CLOSE</button>
+      <a class="btn btn-red" id="btnWrongCodeWa" href="#" target="_blank" rel="noopener">CONTACT ZEUS ➤</a>
+    </div>
+  </div>
+</div>
+
+<!-- Wrong pin -->
+<div class="modal" id="modalWrongPin" role="dialog" aria-modal="true">
+  <div class="modal-card panel">
+    <div class="modal-check modal-check-red">✕</div>
+    <h3 class="glow-red">INCORRECT PIN</h3>
+    <p>The pin you entered is wrong.</p>
+    <p class="modal-quote">Contact the <b>owner</b> on WhatsApp to get the correct pin.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btnWrongPinClose" type="button">CLOSE</button>
+      <a class="btn btn-red" id="btnWrongPinWa" href="#" target="_blank" rel="noopener">CONTACT OWNER ➤</a>
+    </div>
+  </div>
+</div>
+
+<!-- Tryout success -->
+<div class="modal" id="modalTryoutSuccess" role="dialog" aria-modal="true">
+  <div class="modal-card panel">
+    <div class="modal-check">✔</div>
+    <h3 class="glow-gold">APPLICATION READY</h3>
+    <p>Congratulations on completing your RAVAGE ERA tryout submission!</p>
+    <p>Please send the prepared WhatsApp message and wait for the admin to review your application.</p>
+    <p class="modal-quote">“Good luck with your tryouts. We hope to see you representing RAVAGE ERA.”</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btnTryoutClose" type="button">CLOSE</button>
+      <button class="btn btn-gold" id="btnTryoutViewGuild" type="button">VIEW GUILD</button>
+    </div>
+  </div>
+</div>
+
+<!-- Gallery fullscreen -->
+<div class="modal modal-dark" id="modalGallery" role="dialog" aria-modal="true">
+  <div class="modal-full">
+    <button class="modal-close" id="btnGalModalClose" aria-label="Close fullscreen">✕</button>
+    <img id="galModalImg" alt="RAVAGE ERA gallery fullscreen">
+    <p class="gal-modal-label" id="galModalLabel">—</p>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="main.js"></script>
+</body>
+</html>
