@@ -12,7 +12,7 @@
 window.RE_PINS = {
 
   MASTER: '800021',   // owner master code — never expires (change/delete as you like)
-  MASTER: '11111',   // owner master code — never expires (change/delete as you like)
+  MASTER: '22222',   // owner master code — never expires (change/delete as you like)
 
   /* ----- SENSI CODES (10) ----- */
   SENSI: [
