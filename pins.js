@@ -16,43 +16,43 @@ window.RE_PINS = {
 
   /* ----- SENSI CODES (10) ----- */
   SENSI: [
-    'ZEUS-00',
-    'SN-4X7B',
-    'SN-6M1C',
-    'SN-3Z8P',
-    'SN-7L0F',
-    'SN-2R5G',
-    'SN-8T4H',
-    'SN-5W9J',
-    'SN-1E6K',
-    'SN-0A3D'
+    'pablo01',
+    'pablo02',
+    'pablo03',
+    'pablo04',
+    'pablo05',
+    'pablo06',
+    'pablo07',
+    'pablo08',
+    'pablo09',
+    'pablo10'
   ],
 
   /* ----- SPIN & WIN CODES (10) ----- */
   SPIN: [
-    'ZEUS-00',
-    'SP-9M4X',
-    'SP-3R8T',
-    'SP-6W1Z',
-    'SP-5P9C',
-    'SP-2D7F',
-    'SP-8G3H',
-    'SP-4J6V',
-    'SP-1N5B',
-    'SP-0C2Y'
+    'pablo11',
+    'pablo12',
+    'pablo13',
+    'pablo14',
+    'pablo15',
+    'pablo16',
+    'pablo17',
+    'pablo18',
+    'pablo19',
+    'cjcool1'
   ],
 
   /* ----- LIKES & VISITS CODES (10) ----- */
   LIKES: [
-    'ZEUS-00',
-    'LK-8R1M',
-    'LK-2T7G',
-    'LK-9Y4W',
-    'LK-6U0Q',
-    'LK-3I5E',
-    'LK-7O2A',
-    'LK-1S9D',
-    'LK-4F8J',
-    'LK-0K6N'
+    'pablo21',
+    'pablo22',
+    'pablo23',
+    'pablo24',
+    'pablo25',
+    'pablo26',
+    'pablo27',
+    'pablo28',
+    'pablo29',
+    'pablo30'
   ]
 };
