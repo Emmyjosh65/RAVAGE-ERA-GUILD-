@@ -15,7 +15,7 @@ window.RE_PINS = {
 
   /* ----- SENSI CODES (10) ----- */
   SENSI: [
-    'SN-9Q2V',
+    'ZEUS-00',
     'SN-4X7B',
     'SN-6M1C',
     'SN-3Z8P',
