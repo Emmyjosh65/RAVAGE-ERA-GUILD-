@@ -29,7 +29,7 @@ window.RE_PINS = {
 
   /* ----- SPIN & WIN CODES (10) ----- */
   SPIN: [
-    'SP-7K2Q',
+    'ZEUS-00',
     'SP-9M4X',
     'SP-3R8T',
     'SP-6W1Z',
@@ -43,7 +43,7 @@ window.RE_PINS = {
 
   /* ----- LIKES & VISITS CODES (10) ----- */
   LIKES: [
-    'LK-5H3P',
+    'ZEUS-00',
     'LK-8R1M',
     'LK-2T7G',
     'LK-9Y4W',
