@@ -111,7 +111,7 @@
   var ADMINS = [
     { name: 'RE SLICK', pos: 'GUILD LEADER', wa: '27835309249', rank: 1, desc: 'Guild Leader of RAVAGE ERA — maintains the direction, discipline and competitive identity of the guild.' },
     { name: 'KAGURA', pos: 'ASSISTANT GUILD LEADER', wa: '420736488219', rank: 1, desc: 'Assistant Guild Leader — coordinates members and supports guild activities.' },
-    { name: 'MARPHY', pos: 'ELDER ONE', wa: '2349025007555', rank: 2, desc: 'Senior member — experience, consistency and support for the community.' },
+    { name: 'MARPHY', pos: 'ELDER ONE', wa: '2349025007555', rank: 2, desc: 'A skilled elder and pushes guild poinys ernestly.' },
     { name: 'HAPEX', pos: 'ELDER TWO', wa: '2348146067809', rank: 2, desc: 'Elder — keeps the environment strong and welcoming.' },
     { name: 'RE DANNY', pos: 'ELDER TWO', wa: '2349029032927', rank: 2, desc: 'Elder and founding squad member — experience and support.' },
     { name: 'RE ZEUS', pos: 'MOST VALUED MEMBER', wa: '2347064849689', rank: 3, desc: 'Most Valued Member — energy, loyalty and dedication.' },
