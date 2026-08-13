@@ -1,15 +1,14 @@
 /* ============================================================
-   RAVAGE ERA — GUILD HUB  |  main.js  (v3 — FULL)
+   RAVAGE ERA — GUILD HUB  |  main.js  (v4 — PIN vault edition)
    Hash-router SPA + boot + terminal + cloud + widgets +
-   circular Spin & Win + Likes slider + Sensi wizard
+   circular Spin & Win + Likes/Visits + Sensi wizard
    ============================================================ */
 (function () {
   'use strict';
 
   /* ==========================================================
-     GUILD DATA  (edit numbers/members here)
+     GUILD DATA
      ========================================================== */
-  var SECRET = '800012';                    // frontend gate only (hidden)
   var ZEUS_WA = '2349066760078';
   var GUILD_EMAIL = 'ge5853987@gmail.com';
 
@@ -17,9 +16,9 @@
     { num: 48,   suffix: '',  label: 'GUILD MATES' },
     { num: 5000, suffix: '+', label: 'MATCHES PLAYED' },
     { num: 10,   suffix: '+', label: 'TRYOUTS RECEIVED' },
-    { num: null, suffix: '',  label: 'MONTHS STRONG' }   // computed from founding date
+    { num: null, suffix: '',  label: 'MONTHS STRONG' }
   ];
-  var FOUNDED = { month: 3, year: 2025 };   // March 2025
+  var FOUNDED = { month: 3, year: 2025 };
 
   var ANNOUNCEMENTS = [
     { date: 'THIS WEEK', warn: true, title: 'GUILD POINTS WARNING',
@@ -29,7 +28,7 @@
     { date: 'NEWS', warn: false, title: 'THE SQUAD IS GROWING',
       body: 'RAVAGE ERA is 48 warriors strong with 5,000+ matches played. We Stand United.' }
   ];
-  var TOURNAMENT = { hour: 17, minute: 30, offset: 1 };  // 5:30 PM WAT (UTC+1)
+  var TOURNAMENT = { hour: 17, minute: 30, offset: 1 }; // 5:30 PM WAT (UTC+1)
 
   var MVP_LIST = [
     { name: 'SLICK BOY', tag: 'GUILD LEADER', desc: 'Founder of RAVAGE ERA. The one who started it all and keeps the guild on course.' },
@@ -56,10 +55,11 @@
     { q: 'How do I join RAVAGE ERA?', a: 'Go to the TRYOUTS page, fill in your details, select an administrator and send the prepared WhatsApp message. Our admins will review your application.' },
     { q: 'What are the guild requirements?', a: 'Active participation, teamwork, respect, consistency — and at least 1,000 guild points per week.' },
     { q: 'What happens if I have less than 1,000 guild points?', a: 'Any guild mate with less than 1,000 guild points at the end of the week will be removed from the guild.' },
-    { q: 'Is the Spin & Win guaranteed by Garena / Free Fire?', a: 'No. It is a RAVAGE ERA community promotion only. Garena / Free Fire does not officially guarantee these rewards and this website does not modify Free Fire accounts.' },
-    { q: 'How long does a Spin or Likes request take?', a: 'Rewards are entered within 2 to 5 hours after your request is confirmed.' },
+    { q: 'How do I get a premium code?', a: 'Premium codes are one-time use PINs issued by EMMEX / ZEUS (Web Developer) on WhatsApp: 09066760078.' },
+    { q: 'Is the Spin & Win guaranteed by Garena / Free Fire?', a: 'No. It is a RAVAGE ERA community promotion only. Garena / Free Fire does not officially guarantee these rewards.' },
+    { q: 'How long does a Spin or Likes request take?', a: 'Rewards are entered within 2 to 5 hours after your receipt is submitted on WhatsApp.' },
     { q: 'Does this website add likes or visits itself?', a: 'No. The LIKES & VISITS page only prepares a request message for our web developer / admin, who handles the service outside the game.' },
-    { q: 'Who built this website?', a: 'EMMEX / ZEUS — the RAVAGE ERA web developer. He designed and maintains the Guild Hub and connects all of the guild\u2019s community services into one organized platform.' }
+    { q: 'Who built this website?', a: 'EMMEX / ZEUS — the RAVAGE ERA web developer. He designed and maintains the Guild Hub.' }
   ];
 
   var TERM_COMMANDS = {
@@ -68,13 +68,13 @@
     guild: 'RAVAGE ERA — competitive Free Fire guild.\n48 warriors · 5,000+ matches · founded March 2025 by SLICK BOY.',
     admins: 'GUILD LEADER: RE SLICK\nASSISTANT LEADER: KAGURA\nELDERS: MARPHY, HAPEX, RE DANNY\nMVP: RE ZEUS\nWEB DEV: EMMEX / ZEUS',
     tryouts: 'Think you have what it takes?\nSubmit your application on the TRYOUTS page.',
-    spin: 'SPIN & WIN — community promotion.\nReward: GUN SKIN or NOTHING. Access on the SPIN page.',
-    likes: 'LIKES & PROFILE VISITS — 10 to 100 per request.\nAccess on the LIKES & VISITS page.',
+    spin: 'SPIN & WIN — community promotion.\nPrizes: BOOYAH PASS · PREMIUM PASS · EMOTE · BUNDLES · GUN SKIN · NOTHING.',
+    likes: 'LIKES & PROFILE VISITS — 10 to 100 for both.\nAccess on the LIKES & VISITS page.',
     sensi: 'SENSI CONFIGURATION — build your Free Fire sensitivity.\nAccess on the SENSI page.',
     rules: 'THE WARRIOR\u2019S CODE:\n01 WE STAND UNITED\n02 EARN YOUR POINTS (min 1,000/week)\n03 RESPECT EVERY WARRIOR\n04 REPRESENT WITH PRIDE\n05 SHOW UP',
     booyah: 'BOOYAH! 🔥🔥🔥 WE STAND UNITED!',
-    slick: 'SLICK BOY — Guild Leader. Founder of RAVAGE ERA. The direction, discipline and identity of the guild run through him.',
-    kagura: 'KAGURA — Assistant Guild Leader. Coordinates members and hosts the guild tournaments (5:30 PM Nigerian time).',
+    slick: 'SLICK BOY — Guild Leader. Founder of RAVAGE ERA.',
+    kagura: 'KAGURA — Assistant Guild Leader. Hosts guild tournaments (5:30 PM Nigerian time).',
     zeus: 'EMMEX / ZEUS — Web Developer. Built this Guild Hub. WhatsApp: 09066760078',
     clear: null
   };
@@ -170,6 +170,48 @@
   }, true);
 
   /* ==========================================================
+     PIN VAULT (reads pin.env) — one-time-use PINs
+     ========================================================== */
+  var PIN_POOL = { SENSI: [], SPIN: [], LIKES: [] };
+  var PIN_LOADED = false;
+
+  function loadPins() {
+    return fetch('pin.env', { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('pin.env missing'); return r.text(); })
+      .then(function (txt) {
+        PIN_POOL = { SENSI: [], SPIN: [], LIKES: [] };
+        txt.split('\n').forEach(function (line) {
+          line = line.trim();
+          if (!line || line.charAt(0) === '#') return;
+          var i = line.indexOf('=');
+          if (i < 1) return;
+          var section = line.slice(0, i).trim().toUpperCase();
+          var pin = line.slice(i + 1).trim();
+          if (pin && PIN_POOL[section]) PIN_POOL[section].push(pin);
+        });
+        PIN_LOADED = true;
+      })
+      .catch(function () {
+        PIN_LOADED = true;
+      });
+  }
+
+  function usedKey(section) { return 're_used_' + section; }
+
+  function checkPin(section, input) {
+    if (!PIN_POOL[section].length) return false;
+    var used = {};
+    try { used = JSON.parse(localStorage.getItem(usedKey(section)) || '{}'); } catch (e) { used = {}; }
+    var norm = String(input || '').trim().toUpperCase();
+    var idx = PIN_POOL[section].indexOf(norm);
+    if (idx === -1) return false;
+    if (used[norm]) return false;
+    used[norm] = Date.now();
+    try { localStorage.setItem(usedKey(section), JSON.stringify(used)); } catch (e) {}
+    return true;
+  }
+
+  /* ==========================================================
      BOOT SEQUENCE
      ========================================================== */
   var boot = $('#boot'), bootLog = $('#bootLog'), bootTimers = [], bootDone = false;
@@ -179,6 +221,7 @@
     '> SYNCING SQUAD ROSTER (48 MEMBERS) <span class="ok">OK</span>',
     '> CALIBRATING AIM ............... <span class="ok">OK</span>',
     '> CHARGING BOOYAH PROTOCOL ...... <span class="ok">OK</span>',
+    '> MOUNTING PIN VAULT ............ <span class="ok">OK</span>',
     '> ENCRYPTING WARRIOR COMMS ....... <span class="ok">OK</span>',
     '> <span class="gold">ACCESS GRANTED — WE STAND UNITED.</span>'
   ];
@@ -199,9 +242,9 @@
         div.innerHTML = line;
         bootLog.appendChild(div);
         bootLog.scrollTop = bootLog.scrollHeight;
-      }, 260 + i * 330));
+      }, 220 + i * 300));
     });
-    bootTimers.push(setTimeout(finishBoot, 260 + BOOT_LINES.length * 330 + 500));
+    bootTimers.push(setTimeout(finishBoot, 220 + BOOT_LINES.length * 300 + 450));
   })();
 
   /* ==========================================================
@@ -597,24 +640,27 @@
   });
 
   /* ==========================================================
-     SPIN & WIN — CIRCULAR WHEEL (GUN SKIN / NOTHING)
-     8 segments · real 50/50 · lands under the pointer
+     SPIN & WIN — CIRCULAR WHEEL (6 prizes, lands on
+     GUN SKIN or NOTHING only · real 50/50)
      ========================================================== */
+  var WHEEL_SEGS = ['BOOYAH PASS', 'PREMIUM PASS', 'EMOTE', 'BUNDLES', 'GUN SKIN', 'NOTHING'];
   var wheel = $('#wheel');
-  var SEG = 8, SEG_DEG = 360 / SEG, WHEEL_D = Math.round(150 * 0.68);
+  var SEG = 6, SEG_DEG = 360 / SEG, WHEEL_D = Math.round(150 * 0.68);
 
   (function buildWheel() {
     var stops = [], labels = '';
     for (var i = 0; i < SEG; i++) {
-      var isWin = (i % 2 === 0);            // 0,2,4,6 = GUN SKIN · 1,3,5,7 = NOTHING
+      var isWinSeg = (i === 4), isLoseSeg = (i === 5);
+      var color = isWinSeg ? '#f5c142' : (isLoseSeg ? '#3a3a55' : '#16162b');
       var from = i * SEG_DEG, to = (i + 1) * SEG_DEG;
-      stops.push((isWin ? '#f5c142' : '#16162b') + ' ' + from + 'deg ' + to + 'deg');
-      var A = i * SEG_DEG + SEG_DEG / 2;    // segment center (wheel-local, clockwise from top)
+      stops.push(color + ' ' + from + 'deg ' + to + 'deg');
+      var A = i * SEG_DEG + SEG_DEG / 2;    // segment center, clockwise from top
       var rot = A + 90;
-      var color = isWin ? '#1a0b2e' : '#8f9bb3';
-      var text = isWin ? 'GUN SKIN' : 'NOTHING';
-      labels += '<span class="seg-label" style="width:80px;font-size:10.5px;white-space:nowrap;color:' + color +
-        ';transform:translate(-50%,-50%) rotate(' + rot + 'deg) translateY(-' + WHEEL_D + 'px) rotate(-' + rot + 'deg)">' + text + '</span>';
+      var txtColor = (i === 4) ? '#1a0b2e' : '#9aa0ad';
+      var label = WHEEL_SEGS[i];
+      var fs = label.length > 9 ? 8.5 : 9.5;
+      labels += '<span class="seg-label" style="width:82px;font-size:' + fs + 'px;white-space:nowrap;color:' + txtColor +
+        ';transform:translate(-50%,-50%) rotate(' + rot + 'deg) translateY(-' + WHEEL_D + 'px) rotate(-' + rot + 'deg)">' + label + '</span>';
     }
     wheel.style.background = 'conic-gradient(from 90deg, ' + stops.join(',') + ')';
     wheel.insertAdjacentHTML('beforeend', labels);
@@ -622,51 +668,51 @@
 
   var spinning = false;
   var rotation = 0;
+  var spinUidValue = '';
+  var spinResult = '';
 
+  /* intro → gate */
+  $('#btnSpinGo').addEventListener('click', function () {
+    $('#spinIntro').hidden = true;
+    $('#spinGate').hidden = false;
+    window.scrollTo({ top: 0 });
+  });
+  $('#btnSpinBackGate').addEventListener('click', function () {
+    $('#spinGate').hidden = true;
+    $('#spinIntro').hidden = false;
+  });
+  $('#btnSpinNoCode').addEventListener('click', function () {
+    openWa(ZEUS_WA, 'Hello ZEUS, I do not have a premium code for the RAVAGE ERA SPIN & WIN. Please send me one.');
+  });
+  $('#btnSpinPinWa').addEventListener('click', function () {
+    openWa(ZEUS_WA, 'Hello ZEUS, my SPIN & WIN premium code was invalid or expired. Please send me a new one.');
+  });
+
+  /* gate unlock */
   $('#btnSpinUnlock').addEventListener('click', function () {
     var uid = $('#spinUid').value.trim();
     var code = $('#spinCode').value;
     var ok = true;
     ok = validateField('spinUid', 'errSpinUid', uid.length >= 4, 'UID is required.') && ok;
-    ok = validateField('spinCode', 'errSpinCode', code === SECRET, 'Incorrect secret code.') && ok;
-    if (!ok) {
+    ok = validateField('spinCode', 'errSpinCode', !!code, 'Enter your premium code.') && ok;
+    if (!ok) { toast('Please fix the highlighted fields.'); return; }
+    if (!checkPin('SPIN', code)) {
+      setErr('errSpinCode', 'Invalid or expired premium code.');
       $('#spinPinHelp').hidden = false;
-      toast('Incorrect code — contact ZEUS on WhatsApp.');
+      toast('Invalid or expired code — contact ZEUS on WhatsApp.');
       return;
     }
     $('#spinPinHelp').hidden = true;
+    setErr('errSpinCode', '');
+    spinUidValue = uid;
     $('#spinGate').hidden = true;
     $('#spinWheel').hidden = false;
+    $('#spinOutcome').hidden = true;
     window.scrollTo({ top: 0 });
   });
 
-  $('#btnSpinPinWa').addEventListener('click', function () {
-    openWa(ZEUS_WA, 'I entered a wrong code on the SPIN & WIN page of the RAVAGE ERA Guild Hub. Please send me the code.');
-  });
-
-  function showSpinOutcome(win) {
-    var out = $('#spinOutcome');
-    out.hidden = false;
-    if (win) {
-      out.className = 'outcome win';
-      out.innerHTML = '<div>🎉 GUN SKIN!</div>' +
-        '<p>The wheel landed on GUN SKIN. Claim your reward below.</p>' +
-        '<button id="btnSpinGoClaim" class="btn btn-gold" type="button">CLAIM YOUR REWARD →</button>';
-      $('#btnSpinGoClaim').addEventListener('click', function () {
-        $('#spinWheel').hidden = true;
-        $('#spinClaim').hidden = false;
-        window.scrollTo({ top: 0 });
-      });
-    } else {
-      out.className = 'outcome lose';
-      out.innerHTML = '<div>NOTHING this time.</div>' +
-        '<p>The wheel landed on NOTHING. Spin again, warrior — We Stand United.</p>' +
-        '<button id="btnSpinAgain" class="btn btn-ghost" type="button">SPIN AGAIN</button>';
-      $('#btnSpinAgain').addEventListener('click', function () { out.hidden = true; });
-    }
-  }
-
-  $('#btnSpinStart').addEventListener('click', function () {
+  /* the spin */
+  $('#btnSpinSpin').addEventListener('click', function () {
     if (spinning) return;
     spinning = true;
     var btn = this;
@@ -674,12 +720,11 @@
     btn.textContent = 'SPINNING...';
     $('#spinOutcome').hidden = true;
 
-    var win = Math.random() < 0.5;                        // real 50/50
-    var candidates = win ? [0, 2, 4, 6] : [1, 3, 5, 7];
-    var seg = candidates[Math.floor(Math.random() * 4)];
-    var jitter = (Math.random() * 16) - 8;                // ±8° — stays inside the 45° segment
-    var target = ((247.5 - seg * SEG_DEG + jitter) % 360 + 360) % 360;
-    var spins = 5 + Math.floor(Math.random() * 3);        // 5–7 full rotations
+    var win = Math.random() < 0.5;                 // real 50/50
+    var seg = win ? 4 : 5;                          // GUN SKIN or NOTHING
+    var jitter = (Math.random() * 30) - 15;         // ±15° — stays inside the 60° segment
+    var target = ((240 - seg * SEG_DEG + jitter) % 360 + 360) % 360;
+    var spins = 5 + Math.floor(Math.random() * 3);  // 5–7 full rotations
     var cur = rotation % 360;
     var delta = ((target - cur) % 360 + 360) % 360;
     rotation += spins * 360 + delta;
@@ -689,135 +734,125 @@
       spinning = false;
       btn.disabled = false;
       btn.textContent = 'SPIN';
-      showSpinOutcome(win);
+      spinResult = win ? 'GUN SKIN' : 'NOTHING';
+      var out = $('#spinOutcome');
+      out.hidden = false;
+      if (win) {
+        out.className = 'outcome win';
+        $('#spinOutTitle').textContent = '🎉 GUN SKIN!';
+        $('#spinOutNote').textContent = 'The wheel landed on GUN SKIN. Take a screenshot of this result now.';
+      } else {
+        out.className = 'outcome lose';
+        $('#spinOutTitle').textContent = 'NOTHING this time.';
+        $('#spinOutNote').textContent = 'The wheel landed on NOTHING. Take a screenshot of this result, then continue to submit your receipt.';
+      }
     }, 4300);
   });
 
-  /* ---- Spin claim (win only) ---- */
-  var spinShotFile = null;
-
-  $('#btnSpinBack').addEventListener('click', function () {
-    $('#spinClaim').hidden = true;
-    $('#spinWheel').hidden = false;
-  });
-
-  $('#spinShot').addEventListener('change', function () {
-    var f = this.files[0];
-    if (!f) return;
-    if (!f.type.match(/^image\//)) { setErr('errSpinShot', 'Please choose an image file.'); return; }
-    spinShotFile = f;
-    $('#spinShotName').textContent = f.name;
-    $('#spinShotPreview').src = URL.createObjectURL(f);
-    $('#spinShotPreviewWrap').hidden = false;
-    setErr('errSpinShot', '');
-  });
-  $('#btnSpinShotClear').addEventListener('click', function () {
-    spinShotFile = null;
-    $('#spinShot').value = '';
-    $('#spinShotName').textContent = 'Upload Screenshot';
-    $('#spinShotPreviewWrap').hidden = true;
-  });
-
-  $('#btnSpinClaimNext').addEventListener('click', function () {
-    var uid = $('#claimUid').value.trim();
-    var ok = validateField('claimUid', 'errClaimUid', uid.length >= 4, 'UID is required.');
-    if (!ok) { toast('Please fix the highlighted fields.'); return; }
-    var msg = [
-      'RAVAGE ERA SPIN & WIN — REWARD CLAIM', '',
-      'UID: ' + uid,
-      'Reward: GUN SKIN',
-      'Screenshot attached: ' + (spinShotFile ? 'YES' : 'NO'),
-      'Claim confirmed: YES — I confirm my participation in the RAVAGE ERA Spin & Win community promotion.'
-    ].join('\n');
-    openWa(ZEUS_WA, msg);
-    openModal('modalSpinProcess');     // → "entered within 2 to 5 hours"
-  });
-
-  $('#btnSpinProcessOk').addEventListener('click', function () {
-    closeModal('modalSpinProcess');
-    openModal('modalSpinThanks');      // → thanks message
-  });
-
-  $('#btnSpinThanksClose').addEventListener('click', function () {
-    closeModal('modalSpinThanks');
-    $('#spinClaim').hidden = true;
-    $('#spinWheel').hidden = false;
-    $('#spinOutcome').hidden = true;
-    $('#claimUid').value = '';
-    $('#spinShot').value = '';
-    spinShotFile = null;
-    $('#spinShotName').textContent = 'Upload Screenshot';
-    $('#spinShotPreviewWrap').hidden = true;
-    setErr('errClaimUid', '');
-    setErr('errSpinShot', '');
+  /* outcome → receipt */
+  $('#btnSpinToReceipt').addEventListener('click', function () {
+    $('#spinReceiptUid').textContent = spinUidValue;
+    $('#spinReceiptResult').textContent = spinResult;
+    $('#spinWheel').hidden = true;
+    $('#spinReceipt').hidden = false;
     window.scrollTo({ top: 0 });
   });
 
+  /* receipt → WhatsApp (full receipt with screenshot) */
+  $('#btnSpinReceipt').addEventListener('click', function () {
+    var msg = [
+      'RAVAGE ERA SPIN & WIN — RECEIPT', '',
+      'UID: ' + spinUidValue,
+      'Result: ' + spinResult,
+      'Screenshot: ATTACHED (I will send the photo in this chat)',
+      '',
+      'Processing time: 2 to 5 hours.',
+      'We Stand United!'
+    ].join('\n');
+    openWa(ZEUS_WA, msg);
+    toast('WhatsApp opened — attach your screenshot and press Send.');
+  });
+
   /* ==========================================================
-     LIKES & VISITS (min 10 — max 100)
+     LIKES & PROFILE VISITS (min 10 — max 100 for both)
      ========================================================== */
+  var likesUidValue = '';
+  var likesAmount = 50, visitsAmount = 50;
+
+  $('#btnLikesGo').addEventListener('click', function () {
+    $('#likesIntro').hidden = true;
+    $('#likesGate').hidden = false;
+    window.scrollTo({ top: 0 });
+  });
+  $('#btnLikesBack').addEventListener('click', function () {
+    $('#likesGate').hidden = true;
+    $('#likesIntro').hidden = false;
+  });
+  $('#btnLikesNoCode').addEventListener('click', function () {
+    openWa(ZEUS_WA, 'Hello ZEUS, I do not have a premium code for the RAVAGE ERA LIKES & VISITS. Please send me one.');
+  });
+  $('#btnLikesPinWa').addEventListener('click', function () {
+    openWa(ZEUS_WA, 'Hello ZEUS, my LIKES & VISITS premium code was invalid or expired. Please send me a new one.');
+  });
+
   $('#btnLikesUnlock').addEventListener('click', function () {
     var uid = $('#likesUid').value.trim();
     var code = $('#likesCode').value;
     var ok = true;
     ok = validateField('likesUid', 'errLikesUid', uid.length >= 4, 'UID is required.') && ok;
-    ok = validateField('likesCode', 'errLikesCode', code === SECRET, 'Incorrect secret code.') && ok;
-    if (!ok) {
+    ok = validateField('likesCode', 'errLikesCode', !!code, 'Enter your premium code.') && ok;
+    if (!ok) { toast('Please fix the highlighted fields.'); return; }
+    if (!checkPin('LIKES', code)) {
+      setErr('errLikesCode', 'Invalid or expired premium code.');
       $('#likesPinHelp').hidden = false;
-      toast('Incorrect code — contact ZEUS on WhatsApp.');
+      toast('Invalid or expired code — contact ZEUS on WhatsApp.');
       return;
     }
     $('#likesPinHelp').hidden = true;
+    setErr('errLikesCode', '');
+    likesUidValue = uid;
     $('#likesSummaryUid').textContent = uid;
     $('#likesGate').hidden = true;
-    $('#likesConfirm').hidden = false;
+    $('#likesChoose').hidden = false;
     window.scrollTo({ top: 0 });
-  });
-
-  $('#btnLikesPinWa').addEventListener('click', function () {
-    openWa(ZEUS_WA, 'I entered a wrong code on the LIKES & VISITS page of the RAVAGE ERA Guild Hub. Please send me the code.');
   });
 
   $('#likesSlider').addEventListener('input', function () {
-    $('#likesAmount').textContent = this.value;
+    likesAmount = parseInt(this.value, 10);
+    $('#likesAmount').textContent = likesAmount;
+  });
+  $('#visitsSlider').addEventListener('input', function () {
+    visitsAmount = parseInt(this.value, 10);
+    $('#visitsAmount').textContent = visitsAmount;
   });
 
-  $('#btnLikesBack').addEventListener('click', function () {
-    $('#likesConfirm').hidden = true;
+  $('#btnLikesBackChoose').addEventListener('click', function () {
+    $('#likesChoose').hidden = true;
     $('#likesGate').hidden = false;
   });
 
-  $('#btnLikesContinue').addEventListener('click', function () {
-    var uid = $('#likesSummaryUid').textContent;
-    var amount = $('#likesSlider').value;
+  $('#btnLikesNext').addEventListener('click', function () {
+    $('#likesReceiptUid').textContent = likesUidValue;
+    $('#likesReceiptLikes').textContent = likesAmount;
+    $('#likesReceiptVisits').textContent = visitsAmount;
+    $('#likesChoose').hidden = true;
+    $('#likesReceipt').hidden = false;
+    window.scrollTo({ top: 0 });
+  });
+
+  $('#btnLikesReceipt').addEventListener('click', function () {
     var msg = [
-      'RAVAGE ERA LIKES / PROFILE VISITS REQUEST', '',
-      'UID: ' + uid,
-      'Amount: ' + amount,
-      'Service: Free Fire likes & profile visits (RAVAGE ERA community service)'
+      'RAVAGE ERA LIKES / PROFILE VISITS — RECEIPT', '',
+      'UID: ' + likesUidValue,
+      'Likes: ' + likesAmount,
+      'Profile visits: ' + visitsAmount,
+      'Screenshot: ATTACHED (I will send the photo in this chat)',
+      '',
+      'Processing time: 2 to 5 hours.',
+      'We Stand United!'
     ].join('\n');
     openWa(ZEUS_WA, msg);
-    $('#likesProcessAmount').textContent = amount;
-    openModal('modalLikesProcess');    // → "entered within 2 to 5 hours"
-  });
-
-  $('#btnLikesProcessOk').addEventListener('click', function () {
-    closeModal('modalLikesProcess');
-    openModal('modalLikesThanks');     // → thanks message
-  });
-
-  $('#btnLikesThanksClose').addEventListener('click', function () {
-    closeModal('modalLikesThanks');
-    $('#likesConfirm').hidden = true;
-    $('#likesGate').hidden = false;
-    $('#likesUid').value = '';
-    $('#likesCode').value = '';
-    $('#likesSlider').value = 50;
-    $('#likesAmount').textContent = '50';
-    setErr('errLikesUid', '');
-    setErr('errLikesCode', '');
-    $('#likesPinHelp').hidden = true;
-    window.scrollTo({ top: 0 });
+    toast('WhatsApp opened — attach your screenshot and press Send.');
   });
 
   /* ==========================================================
@@ -908,22 +943,25 @@
     sensiGo(5);
   });
 
-  /* PIN check — wrong PIN → contact owner */
+  /* PIN check — one-time PIN from the vault */
+  $('#btnSensiPinAsk').addEventListener('click', function () {
+    openWa(ZEUS_WA, 'Hello ZEUS, I do not have a PIN for the SENSI configuration. Please send me one.');
+  });
+  $('#btnSensiPinWa').addEventListener('click', function () {
+    openWa(ZEUS_WA, 'Hello ZEUS, my SENSI PIN was invalid or expired. Please send me a new one.');
+  });
+
   $('#btnSensiGenerate').addEventListener('click', function () {
     var pin = $('#sensiPin').value;
-    if (pin !== SECRET) {
-      setErr('errSensiPin', 'Incorrect PIN.');
+    if (!checkPin('SENSI', pin)) {
+      setErr('errSensiPin', 'Incorrect or expired PIN.');
       $('#sensiPinHelp').hidden = false;
-      toast('Incorrect PIN — contact the owner for the PIN.');
+      toast('Invalid or expired PIN — contact the owner for a PIN.');
       return;
     }
     setErr('errSensiPin', '');
     $('#sensiPinHelp').hidden = true;
     generateSensi();
-  });
-
-  $('#btnSensiPinWa').addEventListener('click', function () {
-    openWa(ZEUS_WA, 'I entered a wrong PIN on the SENSI page of the RAVAGE ERA Guild Hub. Please send me the PIN.');
   });
 
   /* ---- Sensi generation ---- */
@@ -939,9 +977,9 @@
   ];
 
   function generateSensi() {
-    var fire = ri(43, 50);   // fire button: 43%–50% (random)
+    var fire = ri(43, 50);   // fire button size: 43%–50% (random)
     var rows = SENSI_SETTINGS.map(function (s) {
-      var v = ri(s.min, s.max);   // everything else: 50–170
+      var v = ri(s.min, s.max);
       return '<div class="sensi-row"><span>' + s.name + '</span><b>' + v + '%</b></div>';
     }).join('') +
       '<div class="sensi-row"><span class="fire">🔥 FIRE BUTTON SIZE</span><b>' + fire + '%</b></div>';
@@ -1174,7 +1212,7 @@
   }
 
   /* ==========================================================
-     INIT
+     INIT — load PIN vault first, then render
      ========================================================== */
-  render();
+  loadPins().then(render);
 })();
