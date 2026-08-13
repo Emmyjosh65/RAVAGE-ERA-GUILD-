@@ -1,7 +1,6 @@
 /* ============================================================
-   RAVAGE ERA — GUILD HUB  |  main.js  (v4 — PIN vault edition)
-   Hash-router SPA + boot + terminal + cloud + widgets +
-   circular Spin & Win + Likes/Visits + Sensi wizard
+   RAVAGE ERA — GUILD HUB  |  main.js  (v5 — fixed PIN vault)
+   PINs load synchronously from pins.js (no fetch needed).
    ============================================================ */
 (function () {
   'use strict';
@@ -170,13 +169,29 @@
   }, true);
 
   /* ==========================================================
-     PIN VAULT (reads pin.env) — one-time-use PINs
+     PIN VAULT — v5: reads pins.js synchronously (no fetch).
+     Falls back to pin.env only if pins.js is missing.
      ========================================================== */
   var PIN_POOL = { SENSI: [], SPIN: [], LIKES: [] };
-  var PIN_LOADED = false;
+  var MASTER_PIN = null;
+  var PIN_READY = false;
 
   function loadPins() {
-    return fetch('pin.env', { cache: 'no-store' })
+    /* Primary source: pins.js (script tag loads before main.js) */
+    if (window.RE_PINS && window.RE_PINS.SPIN && window.RE_PINS.SPIN.length) {
+      PIN_POOL = {
+        SENSI: window.RE_PINS.SENSI || [],
+        SPIN: window.RE_PINS.SPIN || [],
+        LIKES: window.RE_PINS.LIKES || []
+      };
+      MASTER_PIN = window.RE_PINS.MASTER ? String(window.RE_PINS.MASTER).trim().toUpperCase() : null;
+      PIN_READY = true;
+      console.info('[RAVAGE ERA] PIN vault loaded from pins.js (' +
+        PIN_POOL.SPIN.length + ' SPIN, ' + PIN_POOL.LIKES.length + ' LIKES, ' + PIN_POOL.SENSI.length + ' SENSI)');
+      return;
+    }
+    /* Fallback: old pin.env (kept for compatibility) */
+    fetch('pin.env', { cache: 'no-store' })
       .then(function (r) { if (!r.ok) throw new Error('pin.env missing'); return r.text(); })
       .then(function (txt) {
         PIN_POOL = { SENSI: [], SPIN: [], LIKES: [] };
@@ -189,26 +204,37 @@
           var pin = line.slice(i + 1).trim();
           if (pin && PIN_POOL[section]) PIN_POOL[section].push(pin);
         });
-        PIN_LOADED = true;
+        PIN_READY = true;
+        console.info('[RAVAGE ERA] PIN vault loaded from pin.env');
       })
       .catch(function () {
-        PIN_LOADED = true;
+        PIN_READY = true;
+        console.warn('[RAVAGE ERA] No PIN vault found (pins.js missing + pin.env failed). Gates locked.');
       });
   }
 
   function usedKey(section) { return 're_used_' + section; }
 
   function checkPin(section, input) {
-    if (!PIN_POOL[section].length) return false;
+    var norm = String(input || '').trim().toUpperCase();
+    /* Owner master code — never expires, never burned */
+    if (MASTER_PIN && norm === MASTER_PIN) return true;
+    if (!PIN_READY) return 'loading';
+    if (!PIN_POOL[section] || !PIN_POOL[section].length) return 'unavailable';
     var used = {};
     try { used = JSON.parse(localStorage.getItem(usedKey(section)) || '{}'); } catch (e) { used = {}; }
-    var norm = String(input || '').trim().toUpperCase();
     var idx = PIN_POOL[section].indexOf(norm);
-    if (idx === -1) return false;
-    if (used[norm]) return false;
-    used[norm] = Date.now();
+    if (idx === -1) return false;       // not a valid code
+    if (used[norm]) return false;       // already used → expired
+    used[norm] = Date.now();            // burn it (one-time use)
     try { localStorage.setItem(usedKey(section), JSON.stringify(used)); } catch (e) {}
     return true;
+  }
+
+  function pinErrorMsg(section, res) {
+    if (res === 'loading') return 'Code system is loading — press CONTINUE again.';
+    if (res === 'unavailable') return 'Code system unavailable — contact ZEUS on WhatsApp.';
+    return 'Invalid or expired premium code.';
   }
 
   /* ==========================================================
@@ -654,7 +680,7 @@
       var color = isWinSeg ? '#f5c142' : (isLoseSeg ? '#3a3a55' : '#16162b');
       var from = i * SEG_DEG, to = (i + 1) * SEG_DEG;
       stops.push(color + ' ' + from + 'deg ' + to + 'deg');
-      var A = i * SEG_DEG + SEG_DEG / 2;    // segment center, clockwise from top
+      var A = i * SEG_DEG + SEG_DEG / 2;
       var rot = A + 90;
       var txtColor = (i === 4) ? '#1a0b2e' : '#9aa0ad';
       var label = WHEEL_SEGS[i];
@@ -671,7 +697,6 @@
   var spinUidValue = '';
   var spinResult = '';
 
-  /* intro → gate */
   $('#btnSpinGo').addEventListener('click', function () {
     $('#spinIntro').hidden = true;
     $('#spinGate').hidden = false;
@@ -688,7 +713,6 @@
     openWa(ZEUS_WA, 'Hello ZEUS, my SPIN & WIN premium code was invalid or expired. Please send me a new one.');
   });
 
-  /* gate unlock */
   $('#btnSpinUnlock').addEventListener('click', function () {
     var uid = $('#spinUid').value.trim();
     var code = $('#spinCode').value;
@@ -696,10 +720,11 @@
     ok = validateField('spinUid', 'errSpinUid', uid.length >= 4, 'UID is required.') && ok;
     ok = validateField('spinCode', 'errSpinCode', !!code, 'Enter your premium code.') && ok;
     if (!ok) { toast('Please fix the highlighted fields.'); return; }
-    if (!checkPin('SPIN', code)) {
-      setErr('errSpinCode', 'Invalid or expired premium code.');
+    var res = checkPin('SPIN', code);
+    if (res !== true) {
+      setErr('errSpinCode', pinErrorMsg('SPIN', res));
       $('#spinPinHelp').hidden = false;
-      toast('Invalid or expired code — contact ZEUS on WhatsApp.');
+      toast('Code not accepted — contact ZEUS on WhatsApp.');
       return;
     }
     $('#spinPinHelp').hidden = true;
@@ -711,7 +736,6 @@
     window.scrollTo({ top: 0 });
   });
 
-  /* the spin */
   $('#btnSpinSpin').addEventListener('click', function () {
     if (spinning) return;
     spinning = true;
@@ -720,11 +744,11 @@
     btn.textContent = 'SPINNING...';
     $('#spinOutcome').hidden = true;
 
-    var win = Math.random() < 0.5;                 // real 50/50
-    var seg = win ? 4 : 5;                          // GUN SKIN or NOTHING
-    var jitter = (Math.random() * 30) - 15;         // ±15° — stays inside the 60° segment
+    var win = Math.random() < 0.5;
+    var seg = win ? 4 : 5;
+    var jitter = (Math.random() * 30) - 15;
     var target = ((240 - seg * SEG_DEG + jitter) % 360 + 360) % 360;
-    var spins = 5 + Math.floor(Math.random() * 3);  // 5–7 full rotations
+    var spins = 5 + Math.floor(Math.random() * 3);
     var cur = rotation % 360;
     var delta = ((target - cur) % 360 + 360) % 360;
     rotation += spins * 360 + delta;
@@ -749,7 +773,6 @@
     }, 4300);
   });
 
-  /* outcome → receipt */
   $('#btnSpinToReceipt').addEventListener('click', function () {
     $('#spinReceiptUid').textContent = spinUidValue;
     $('#spinReceiptResult').textContent = spinResult;
@@ -758,7 +781,6 @@
     window.scrollTo({ top: 0 });
   });
 
-  /* receipt → WhatsApp (full receipt with screenshot) */
   $('#btnSpinReceipt').addEventListener('click', function () {
     var msg = [
       'RAVAGE ERA SPIN & WIN — RECEIPT', '',
@@ -802,10 +824,11 @@
     ok = validateField('likesUid', 'errLikesUid', uid.length >= 4, 'UID is required.') && ok;
     ok = validateField('likesCode', 'errLikesCode', !!code, 'Enter your premium code.') && ok;
     if (!ok) { toast('Please fix the highlighted fields.'); return; }
-    if (!checkPin('LIKES', code)) {
-      setErr('errLikesCode', 'Invalid or expired premium code.');
+    var res = checkPin('LIKES', code);
+    if (res !== true) {
+      setErr('errLikesCode', pinErrorMsg('LIKES', res));
       $('#likesPinHelp').hidden = false;
-      toast('Invalid or expired code — contact ZEUS on WhatsApp.');
+      toast('Code not accepted — contact ZEUS on WhatsApp.');
       return;
     }
     $('#likesPinHelp').hidden = true;
@@ -943,7 +966,6 @@
     sensiGo(5);
   });
 
-  /* PIN check — one-time PIN from the vault */
   $('#btnSensiPinAsk').addEventListener('click', function () {
     openWa(ZEUS_WA, 'Hello ZEUS, I do not have a PIN for the SENSI configuration. Please send me one.');
   });
@@ -953,10 +975,11 @@
 
   $('#btnSensiGenerate').addEventListener('click', function () {
     var pin = $('#sensiPin').value;
-    if (!checkPin('SENSI', pin)) {
-      setErr('errSensiPin', 'Incorrect or expired PIN.');
+    var res = checkPin('SENSI', pin);
+    if (res !== true) {
+      setErr('errSensiPin', pinErrorMsg('SENSI', res));
       $('#sensiPinHelp').hidden = false;
-      toast('Invalid or expired PIN — contact the owner for a PIN.');
+      toast('PIN not accepted — contact the owner for a PIN.');
       return;
     }
     setErr('errSensiPin', '');
@@ -977,7 +1000,7 @@
   ];
 
   function generateSensi() {
-    var fire = ri(43, 50);   // fire button size: 43%–50% (random)
+    var fire = ri(43, 50);
     var rows = SENSI_SETTINGS.map(function (s) {
       var v = ri(s.min, s.max);
       return '<div class="sensi-row"><span>' + s.name + '</span><b>' + v + '%</b></div>';
@@ -993,7 +1016,6 @@
     window.scrollTo({ top: 0 });
   }
 
-  /* Copy / share use the EXACT numbers shown on screen */
   function readShownSensi() {
     return $$('.sensi-row', $('#sensiList')).map(function (row) {
       return row.querySelector('span').textContent.trim() + ': ' + row.querySelector('b').textContent.trim();
@@ -1212,7 +1234,8 @@
   }
 
   /* ==========================================================
-     INIT — load PIN vault first, then render
+     INIT
      ========================================================== */
-  loadPins().then(render);
+  render();
+  loadPins();
 })();
