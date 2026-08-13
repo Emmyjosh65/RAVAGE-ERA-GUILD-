@@ -1,358 +1,486 @@
 /* ============================================================
-   RAVAGE ERA — GUILD HUB  |  main.js
-   Hash-router SPA + boot + particles + spin wheel + sensi wizard
+   RAVAGE ERA — GUILD HUB  |  main.js  (v3 — FULL)
+   Hash-router SPA + boot + terminal + cloud + widgets +
+   circular Spin & Win + Likes slider + Sensi wizard
    ============================================================ */
 (function () {
   'use strict';
 
   /* ==========================================================
-     CONFIG — edit these
+     GUILD DATA  (edit numbers/members here)
      ========================================================== */
-  var SECRET = atob('ODAwMDEy');            // 800012 — community secret code (hidden)
-  var PIN    = atob('ODAwMDEy');            // 800012 — sensi pin (hidden)
-  var ZEUS_WA = '2349066760078';            // WhatsApp number for Zeus web dev / owner
+  var SECRET = '800012';                    // frontend gate only (hidden)
+  var ZEUS_WA = '2349066760078';
   var GUILD_EMAIL = 'ge5853987@gmail.com';
+
+  var GUILD_STATS = [
+    { num: 48,   suffix: '',  label: 'GUILD MATES' },
+    { num: 5000, suffix: '+', label: 'MATCHES PLAYED' },
+    { num: 10,   suffix: '+', label: 'TRYOUTS RECEIVED' },
+    { num: null, suffix: '',  label: 'MONTHS STRONG' }   // computed from founding date
+  ];
+  var FOUNDED = { month: 3, year: 2025 };   // March 2025
+
+  var ANNOUNCEMENTS = [
+    { date: 'THIS WEEK', warn: true, title: 'GUILD POINTS WARNING',
+      body: 'Any guild mate with less than 1,000 guild points at the end of the week will be removed. Earn your points, warriors.' },
+    { date: 'UPCOMING', warn: false, title: 'GUILD TOURNAMENT',
+      body: 'Hosted by Assistant Guild Leader KAGURA at 5:30 PM Nigerian time. All squads report in.' },
+    { date: 'NEWS', warn: false, title: 'THE SQUAD IS GROWING',
+      body: 'RAVAGE ERA is 48 warriors strong with 5,000+ matches played. We Stand United.' }
+  ];
+  var TOURNAMENT = { hour: 17, minute: 30, offset: 1 };  // 5:30 PM WAT (UTC+1)
+
+  var MVP_LIST = [
+    { name: 'SLICK BOY', tag: 'GUILD LEADER', desc: 'Founder of RAVAGE ERA. The one who started it all and keeps the guild on course.' },
+    { name: 'KAGURA', tag: 'ASSISTANT GUILD LEADER', desc: 'Coordinates the guild and hosts our tournaments. The engine behind guild events.' },
+    { name: 'RE DANNY', tag: 'ELDER', desc: 'Part of the first squad. Experience and consistency in every lobby.' },
+    { name: 'HAPEX', tag: 'ELDER', desc: 'Keeps the community strong and the environment welcoming for every warrior.' }
+  ];
+
+  var TIMELINE = [
+    { date: 'MARCH 2025', title: 'THE FOUNDING', body: 'RAVAGE ERA was founded by SLICK BOY with a vision: a guild built on trust, skill and loyalty.' },
+    { date: 'MARCH 2025', title: 'THE FIRST SQUAD', body: 'The first squad was formed: SLICK, DANNY and KAGURA — the core that the guild was built around.' },
+    { date: '2025 — 2026', title: 'GROWTH & RECRUITMENT', body: 'Tryouts opened and warriors joined from everywhere. The guild grew into a real community.' },
+    { date: 'TODAY', title: 'THE CURRENT ERA', body: '48 warriors strong, 5,000+ matches across BR, Clash Squad and guild wars — and we keep climbing.' }
+  ];
+
+  var SKILLS = [
+    { label: 'RUSH', pct: 92, note: 'Main playstyle — we push hard.' },
+    { label: 'SUPPORT', pct: 78, note: 'Covering fire and callouts.' },
+    { label: 'SNIPER', pct: 64, note: 'Our web developer is the sniper guy.' },
+    { label: 'LEADERSHIP', pct: 85, note: 'Squad leads and elders keep order.' }
+  ];
+
+  var FAQ = [
+    { q: 'How do I join RAVAGE ERA?', a: 'Go to the TRYOUTS page, fill in your details, select an administrator and send the prepared WhatsApp message. Our admins will review your application.' },
+    { q: 'What are the guild requirements?', a: 'Active participation, teamwork, respect, consistency — and at least 1,000 guild points per week.' },
+    { q: 'What happens if I have less than 1,000 guild points?', a: 'Any guild mate with less than 1,000 guild points at the end of the week will be removed from the guild.' },
+    { q: 'Is the Spin & Win guaranteed by Garena / Free Fire?', a: 'No. It is a RAVAGE ERA community promotion only. Garena / Free Fire does not officially guarantee these rewards and this website does not modify Free Fire accounts.' },
+    { q: 'How long does a Spin or Likes request take?', a: 'Rewards are entered within 2 to 5 hours after your request is confirmed.' },
+    { q: 'Does this website add likes or visits itself?', a: 'No. The LIKES & VISITS page only prepares a request message for our web developer / admin, who handles the service outside the game.' },
+    { q: 'Who built this website?', a: 'EMMEX / ZEUS — the RAVAGE ERA web developer. He designed and maintains the Guild Hub and connects all of the guild\u2019s community services into one organized platform.' }
+  ];
+
+  var TERM_COMMANDS = {
+    help: 'Available: help · whoami · guild · admins · tryouts · spin · likes · sensi · rules · booyah · slick · kagura · zeus · clear',
+    whoami: 'RAVAGER // WARRIOR // MEMBER OF RAVAGE ERA.\nWe Stand United.',
+    guild: 'RAVAGE ERA — competitive Free Fire guild.\n48 warriors · 5,000+ matches · founded March 2025 by SLICK BOY.',
+    admins: 'GUILD LEADER: RE SLICK\nASSISTANT LEADER: KAGURA\nELDERS: MARPHY, HAPEX, RE DANNY\nMVP: RE ZEUS\nWEB DEV: EMMEX / ZEUS',
+    tryouts: 'Think you have what it takes?\nSubmit your application on the TRYOUTS page.',
+    spin: 'SPIN & WIN — community promotion.\nReward: GUN SKIN or NOTHING. Access on the SPIN page.',
+    likes: 'LIKES & PROFILE VISITS — 10 to 100 per request.\nAccess on the LIKES & VISITS page.',
+    sensi: 'SENSI CONFIGURATION — build your Free Fire sensitivity.\nAccess on the SENSI page.',
+    rules: 'THE WARRIOR\u2019S CODE:\n01 WE STAND UNITED\n02 EARN YOUR POINTS (min 1,000/week)\n03 RESPECT EVERY WARRIOR\n04 REPRESENT WITH PRIDE\n05 SHOW UP',
+    booyah: 'BOOYAH! 🔥🔥🔥 WE STAND UNITED!',
+    slick: 'SLICK BOY — Guild Leader. Founder of RAVAGE ERA. The direction, discipline and identity of the guild run through him.',
+    kagura: 'KAGURA — Assistant Guild Leader. Coordinates members and hosts the guild tournaments (5:30 PM Nigerian time).',
+    zeus: 'EMMEX / ZEUS — Web Developer. Built this Guild Hub. WhatsApp: 09066760078',
+    clear: null
+  };
+
+  var CLOUD_WORDS = ['BOOYAH', 'RUSH', 'CLUTCH', 'SNIPER', 'HEADSHOT', 'RANKED', 'SQUAD', 'BOOYAH PASS', 'GUN SKIN', 'WARRIOR', 'GLORY', 'UNITED', 'TRYOUT', 'LEGEND', 'ERA', 'VICTORY', 'ELITE', 'SENSI'];
+
+  /* ==========================================================
+     RE PLACEHOLDER IMAGE (no photo files needed)
+     ========================================================== */
+  function reImage(label, big) {
+    var t = encodeURIComponent(label || 'GUILD HUB');
+    var w = big ? 900 : 640, h = big ? 900 : 640;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#141824"/><stop offset="1" stop-color="#06070a"/></linearGradient></defs>' +
+      '<rect width="' + w + '" height="' + h + '" fill="url(#g)"/>' +
+      '<rect x="24" y="24" width="' + (w - 48) + '" height="' + (h - 48) + '" fill="none" stroke="#f5c542" stroke-opacity=".45" stroke-width="2"/>' +
+      '<circle cx="' + (w / 2) + '" cy="' + (h / 2 - 60) + '" r="' + (big ? 150 : 110) + '" fill="none" stroke="#f5c542" stroke-opacity=".35" stroke-width="2"/>' +
+      '<text x="' + (w / 2) + '" y="' + (h / 2 - 20) + '" font-family="Arial" font-size="' + (big ? 120 : 90) + '" font-weight="900" fill="#f5c542" text-anchor="middle">RE</text>' +
+      '<text x="' + (w / 2) + '" y="' + (h / 2 + 90) + '" font-family="Arial" font-size="' + (big ? 34 : 24) + '" font-weight="700" fill="#e8e6df" text-anchor="middle" letter-spacing="6">RAVAGE ERA</text>' +
+      '<text x="' + (w / 2) + '" y="' + (h / 2 + 140) + '" font-family="Arial" font-size="' + (big ? 20 : 15) + '" fill="#9aa0ad" text-anchor="middle" letter-spacing="3">' + t + '</text></svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+
+  var ASSETS = [
+    { src: reImage('PROFILE 01'), label: 'RAVAGE ERA PROFILE 01' },
+    { src: reImage('PROFILE 02'), label: 'RAVAGE ERA PROFILE 02' },
+    { src: reImage('PROFILE 03'), label: 'RAVAGE ERA PROFILE 03' },
+    { src: reImage('PROFILE 04'), label: 'RAVAGE ERA PROFILE 04' },
+    { src: reImage('PROFILE 05'), label: 'RAVAGE ERA PROFILE 05' },
+    { src: reImage('THE GUILD', true), label: 'RAVAGE ERA GUILD' },
+    { src: reImage('PROFILE 07'), label: 'RAVAGE ERA PROFILE 07' },
+    { src: reImage('PROFILE 08'), label: 'RAVAGE ERA PROFILE 08' }
+  ];
+
+  var ADMINS = [
+    { name: 'RE SLICK', pos: 'GUILD LEADER', wa: '27835309249', rank: 1, desc: 'Guild Leader of RAVAGE ERA — maintains the direction, discipline and competitive identity of the guild.' },
+    { name: 'KAGURA', pos: 'ASSISTANT GUILD LEADER', wa: '420736488219', rank: 1, desc: 'Assistant Guild Leader — coordinates members and supports guild activities.' },
+    { name: 'MARPHY', pos: 'ELDER ONE', wa: '2349025007555', rank: 2, desc: 'Senior member — experience, consistency and support for the community.' },
+    { name: 'HAPEX', pos: 'ELDER TWO', wa: '2348146067809', rank: 2, desc: 'Elder — keeps the environment strong and welcoming.' },
+    { name: 'RE DANNY', pos: 'ELDER TWO', wa: '2349029032927', rank: 2, desc: 'Elder and founding squad member — experience and support.' },
+    { name: 'RE ZEUS', pos: 'MOST VALUED MEMBER', wa: '2347064849689', rank: 3, desc: 'Most Valued Member — energy, loyalty and dedication.' },
+    { name: 'EMMEX / ZEUS', pos: 'WEB DEVELOPER', wa: ZEUS_WA, rank: 3, desc: 'Web developer behind the Guild Hub — designs, develops and maintains the digital platform.' }
+  ];
 
   /* ==========================================================
      HELPERS
      ========================================================== */
   function $(s) { return document.querySelector(s); }
-  function $$(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
-  function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function toast(msg, isErr) {
-    var t = $('#toast');
-    t.textContent = msg;
-    t.className = 'toast show' + (isErr ? ' error' : '');
-    clearTimeout(t._tm);
-    t._tm = setTimeout(function () { t.className = 'toast'; }, 3400);
+  function $$(s, p) { return Array.prototype.slice.call((p || document).querySelectorAll(s)); }
+  function initials(name) { return name.replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase() || 'RE'; }
+  function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function isPhone(v) { return String(v).replace(/\D/g, '').length >= 7; }
+  function setErr(id, msg) { var el = document.getElementById(id); if (el) el.textContent = msg || ''; }
+  function markField(id, ok) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = ok ? '' : 'var(--red)';
+    el.style.boxShadow = ok ? '' : '0 0 0 3px rgba(226,51,58,.18)';
   }
-  function openModal(id) { $('#' + id).classList.add('show'); document.body.classList.add('modal-open'); }
-  function closeModal(id) { $('#' + id).classList.remove('show'); document.body.classList.remove('modal-open'); }
-  function closeAllModals() { $$('.modal.show').forEach(function (m) { m.classList.remove('show'); }); document.body.classList.remove('modal-open'); }
+  function validateField(id, errId, cond, msg) {
+    var ok = !!cond;
+    setErr(errId, ok ? '' : msg);
+    markField(id, ok);
+    return ok;
+  }
+  function openWa(number, text) {
+    var url = 'https://wa.me/' + number + '?text=' + encodeURIComponent(text || '');
+    var win = window.open(url, '_blank', 'noopener');
+    if (!win) window.location.href = url;
+    return url;
+  }
+  function toast(msg) {
+    var el = $('#toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.hidden = true; }, 3600);
+  }
+  function openModal(id) { var m = document.getElementById(id); if (m) m.hidden = false; }
+  function closeModal(id) { var m = document.getElementById(id); if (m) m.hidden = true; }
+  function closeAllModals() { $$('.modal').forEach(function (m) { m.hidden = true; }); }
 
-  /* ==========================================================
-     DATA
-     ========================================================== */
-  var GUILD_STATS = [
-    { num: 48, suffix: '', label: 'GUILD MATES' },
-    { num: 5000, suffix: '+', label: 'MATCHES PLAYED' },
-    { num: 10, suffix: '+', label: 'TRYOUTS RECEIVED' },
-    { num: null, suffix: '', label: 'MONTHS STRONG' }
-  ];
-  var FOUNDED = { month: 2, year: 2025 }; // March 2025 (0-based month)
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var MENU = [
-    { n: '01', t: 'TRYOUTS', d: 'Join the guild', href: '#/tryouts' },
-    { n: '02', t: 'GUILD', d: 'About RAVAGE ERA', href: '#/guild' },
-    { n: '03', t: 'ADMINS', d: 'Meet the team', href: '#/admins' },
-    { n: '04', t: 'SPIN & WIN', d: 'Community promotion', href: '#/spin' },
-    { n: '05', t: 'LIKES & VISITS', d: 'Community service', href: '#/likes' },
-    { n: '06', t: 'SENSI', d: 'Sensi configuration', href: '#/sensi' },
-    { n: '07', t: 'GALLERY', d: 'Media & profiles', href: '#/gallery' },
-    { n: '08', t: 'CONTACT', d: 'Reach the guild', href: '#/contact' }
-  ];
-
-  var ANNOUNCEMENTS = [
-    { date: 'THIS WEEK', warn: true, title: 'GUILD POINTS WARNING', body: 'Any guild mate with less than 1,000 guild points at the end of the week will be removed. Earn your points, warriors.' },
-    { date: 'UPCOMING', warn: false, title: 'GUILD TOURNAMENT', body: 'Tournament hosted by Assistant Guild Leader KAGURA at 5:30 PM Nigerian time. All squads report in.' },
-    { date: 'NEWS', warn: false, title: 'THE SQUAD IS GROWING', body: 'RAVAGE ERA is 48 warriors strong with 5,000+ matches played. We Stand United.' }
-  ];
-
-  var TOURNAMENT = { hour: 17, minute: 30, offset: 1 }; // 5:30 PM WAT (UTC+1)
-
-  var MVP = { initials: 'SB', name: 'SLICK BOY', tag: 'GUILD LEADER', desc: 'Founder of RAVAGE ERA. Keeps the squad focused and grinding every week.' };
-
-  var ROLES = [
-    { name: 'RUSH', val: 92 }, { name: 'SUPPORT', val: 78 },
-    { name: 'SNIPER', val: 64 }, { name: 'LEADERSHIP', val: 85 }
-  ];
-
-  var ADMINS = [
-    { initials: 'RS', name: 'RE SLICK', role: 'GUILD LEADER', desc: 'Guild Leader of RAVAGE ERA — maintains direction, discipline and competitive identity.' },
-    { initials: 'KA', name: 'KAGURA', role: 'ASSISTANT GUILD LEADER', desc: 'Coordinates members, supports guild activities and keeps the team moving forward.' },
-    { initials: 'MA', name: 'MARPHY', role: 'ELDER ONE', desc: 'Respected senior member representing experience, consistency and support.' },
-    { initials: 'HA', name: 'HAPEX', role: 'ELDER TWO', desc: 'Elder contributing to the community and keeping the guild welcoming.' },
-    { initials: 'RD', name: 'RE DANNY', role: 'ELDER TWO', desc: 'Elder offering experience, support and leadership to the community.' },
-    { initials: 'RZ', name: 'RE ZEUS', role: 'MOST VALUED MEMBER', desc: 'Highly valued member bringing energy, loyalty and dedication to the guild.' },
-    { initials: 'EM', name: 'EMMEX / ZEUS', role: 'WEB DEVELOPER', desc: 'Designs, develops and maintains the Guild Hub and connects all community services.' }
-  ];
-
-  var FAQS = [
-    { q: 'How do I join RAVAGE ERA?', a: 'Go to the TRYOUTS page, fill in your details, select an administrator and send the prepared WhatsApp message. Our admins will review your application.' },
-    { q: 'What does the guild expect from members?', a: 'Active participation, teamwork, respect, consistency — and at least 1,000 guild points per week.' },
-    { q: 'Are rewards from SPIN & WIN guaranteed by Garena?', a: 'No. It is a RAVAGE ERA community promotion only. Garena / Free Fire does not officially guarantee these rewards.' },
-    { q: 'Does the LIKES & VISITS page add likes directly?', a: 'No. It prepares a request for our web developer / admin, who handles the service. Delivery takes 2 to 5 hours.' },
-    { q: 'Who is the web developer?', a: 'EMMEX / ZEUS — the RAVAGE ERA web developer. He designed and maintains the Guild Hub.' }
-  ];
-
-  var PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500">' +
-    '<rect width="400" height="500" fill="#0d1016"/>' +
-    '<rect x="20" y="20" width="360" height="460" fill="none" stroke="#f5c542" stroke-opacity="0.3"/>' +
-    '<text x="200" y="245" font-family="Arial" font-size="30" font-weight="900" fill="#f5c542" text-anchor="middle">RAVAGE ERA</text>' +
-    '<text x="200" y="285" font-family="Arial" font-size="14" fill="#9aa0ad" text-anchor="middle">PROFILE IMAGE</text>' +
-    '</svg>');
-  window.__PH = PLACEHOLDER;
-
-  // Add your gallery image files here (put them in the same folder as index.html)
-  var ASSETS = [
-    { src: 'ravage-profile-01.png', label: 'RAVAGE ERA PROFILE 01' },
-    { src: 'IMG_2580.png', label: 'RAVAGE ERA PROFILE 02' },
-    { src: 'ravage-profile-03.png', label: 'RAVAGE ERA PROFILE 03' },
-    { src: 'ravage-profile-04.png', label: 'RAVAGE ERA PROFILE 04' },
-    { src: 'ravage-profile-05.png', label: 'RAVAGE ERA PROFILE 05' },
-    { src: 'ravage-profile-06.png', label: 'RAVAGE ERA PROFILE 06' },
-    { src: 'ravage-profile-07.png', label: 'RAVAGE ERA PROFILE 07' },
-    { src: 'ravage-profile-08.png', label: 'RAVAGE ERA PROFILE 08' }
-  ];
-
-  var PHONES = [
-    'iPhone', 'Samsung Galaxy', 'Tecno', 'Infinix', 'Xiaomi / Redmi',
-    'Realme', 'Oppo', 'Vivo', 'OnePlus', 'Google Pixel',
-    'Huawei', 'Motorola', 'Nokia', 'Asus ROG', 'iTel'
-  ];
-  var FINGERS = ['2 FINGERS', '3 FINGERS', '4 FINGERS', '5 FINGERS'];
-  var DPIS = [
-    { id: 'lower', label: 'LOWER', range: '400 – 600' },
-    { id: 'medium', label: 'MEDIUM', range: '600 – 800' },
-    { id: 'higher', label: 'HIGHER', range: '800 – 1000' }
-  ];
+  /* ---------------- Image error fallback ---------------- */
+  document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (img && img.tagName === 'IMG' && !img.dataset.fbk) {
+      img.dataset.fbk = '1';
+      img.src = reImage(img.getAttribute('data-label') || 'GUILD HUB');
+    }
+  }, true);
 
   /* ==========================================================
      BOOT SEQUENCE
      ========================================================== */
-  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var bootLines = [
-    '> INITIALIZING RAVAGE ERA OS v2.0 ...',
-    '> LOADING GUILD HUB MODULES ........ OK',
-    '> MOUNTING SPIN & WIN WHEEL ........ OK',
-    '> CALIBRATING SENSI ENGINE ......... OK',
-    '> CONNECTING COMMUNITY SERVICES .... OK',
-    '> WE STAND UNITED. WELCOME, WARRIOR.'
+  var boot = $('#boot'), bootLog = $('#bootLog'), bootTimers = [], bootDone = false;
+  var BOOT_LINES = [
+    '> INITIALIZING RAVAGE ERA SYSTEMS...',
+    '> LOADING GUILD DATA ............ <span class="ok">OK</span>',
+    '> SYNCING SQUAD ROSTER (48 MEMBERS) <span class="ok">OK</span>',
+    '> CALIBRATING AIM ............... <span class="ok">OK</span>',
+    '> CHARGING BOOYAH PROTOCOL ...... <span class="ok">OK</span>',
+    '> ENCRYPTING WARRIOR COMMS ....... <span class="ok">OK</span>',
+    '> <span class="gold">ACCESS GRANTED — WE STAND UNITED.</span>'
   ];
-  var bootDone = false;
-  function runBoot() {
-    var log = $('#bootLog');
-    log.innerHTML = '';
-    bootLines.forEach(function (line, i) {
-      setTimeout(function () {
-        var s = document.createElement('span');
-        s.textContent = line;
-        log.appendChild(s);
-        log.scrollTop = log.scrollHeight;
-        if (i === bootLines.length - 1) setTimeout(endBoot, 500);
-      }, i * 320);
-    });
-    setTimeout(endBoot, bootLines.length * 320 + 1200);
-  }
-  function endBoot() {
+  function finishBoot() {
     if (bootDone) return;
     bootDone = true;
-    $('#boot').classList.add('hide');
-    setTimeout(function () { $('#boot').style.display = 'none'; }, 600);
+    bootTimers.forEach(clearTimeout);
+    try { sessionStorage.setItem('re_booted', '1'); } catch (e) {}
+    boot.classList.add('hide');
+    setTimeout(function () { if (boot.parentNode) boot.parentNode.removeChild(boot); }, 550);
   }
-  $('#bootSkip').addEventListener('click', endBoot);
-  if (reducedMotion) endBoot(); else runBoot();
+  $('#btnBootSkip').addEventListener('click', finishBoot);
+  (function runBoot() {
+    if (sessionStorage.getItem('re_booted') === '1') { finishBoot(); return; }
+    BOOT_LINES.forEach(function (line, i) {
+      bootTimers.push(setTimeout(function () {
+        var div = document.createElement('div');
+        div.innerHTML = line;
+        bootLog.appendChild(div);
+        bootLog.scrollTop = bootLog.scrollHeight;
+      }, 260 + i * 330));
+    });
+    bootTimers.push(setTimeout(finishBoot, 260 + BOOT_LINES.length * 330 + 500));
+  })();
 
   /* ==========================================================
-     ROUTER
+     ROUTER + SIDEBAR + BRAND
      ========================================================== */
-  var PAGES = ['home', 'tryouts', 'guild', 'admins', 'spin', 'likes', 'sensi', 'gallery', 'contact'];
-  function showPage(name) {
-    if (PAGES.indexOf(name) === -1) name = 'home';
-    $$('.page').forEach(function (p) { p.classList.toggle('active', p.dataset.page === name); });
-    $$('.nav-link').forEach(function (l) { l.classList.toggle('active', l.dataset.nav === name); });
+  var ROUTES = ['home', 'tryouts', 'spin', 'likes', 'sensi', 'guild', 'admins', 'gallery', 'profiles', 'contact', 'faq'];
+
+  function getRoute() {
+    var h = location.hash.replace(/^#\/?/, '').split('?')[0];
+    return ROUTES.indexOf(h) !== -1 ? h : 'tryouts';
+  }
+  function render() {
+    var route = getRoute();
+    $$('.page').forEach(function (sec) { sec.classList.toggle('active', sec.id === 'page-' + route); });
+    $$('.nav-link').forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#/' + route); });
     closeSidebar();
-    window.scrollTo(0, 0);
-    if (name === 'spin') initWheel();
+    window.scrollTo({ top: 0 });
+    document.title = route.toUpperCase() + ' — RAVAGE ERA GUILD HUB';
   }
-  function currentHash() { return (location.hash || '#/home').replace('#/', '').split('?')[0]; }
-  window.addEventListener('hashchange', function () { showPage(currentHash()); });
+  window.addEventListener('hashchange', render);
+
+  var sidebar = $('#sidebar'), overlay = $('#overlay'), menuBtn = $('#btnMenu');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); menuBtn.classList.add('open'); }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); menuBtn.classList.remove('open'); }
+  menuBtn.addEventListener('click', function () { sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+  overlay.addEventListener('click', closeSidebar);
+  $$('.nav-link').forEach(function (a) { a.addEventListener('click', closeSidebar); });
+
+  var brand = document.querySelector('.brand[data-nav]');
+  if (brand) {
+    brand.addEventListener('click', function () { location.hash = brand.getAttribute('data-nav'); });
+    brand.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); location.hash = brand.getAttribute('data-nav'); }
+    });
+  }
 
   /* ==========================================================
-     SIDEBAR (mobile)
+     TYPEWRITER
      ========================================================== */
-  function openSidebar() { $('#sidebar').classList.add('open'); $('#navBackdrop').classList.add('show'); }
-  function closeSidebar() { $('#sidebar').classList.remove('open'); $('#navBackdrop').classList.remove('show'); }
-  $('#btnMenu').addEventListener('click', openSidebar);
-  $('#navBackdrop').addEventListener('click', closeSidebar);
+  var TYPED = ['WE STAND UNITED.', 'Built by warriors. United by RAVAGE.', 'Drop in. Squad up. Booyah.', 'Think you have what it takes?', '5,000+ matches. One guild. Zero doubts.'];
+  (function typewriter() {
+    var el = $('#typewriter');
+    if (!el) return;
+    if (reducedMotion) { el.textContent = TYPED[0]; return; }
+    var pi = 0, ci = 0, deleting = false;
+    (function step() {
+      var phrase = TYPED[pi];
+      el.textContent = phrase.slice(0, ci);
+      var delay = deleting ? 20 : 46;
+      if (!deleting) {
+        if (ci < phrase.length) { ci++; setTimeout(step, delay); return; }
+        deleting = true; setTimeout(step, 1900); return;
+      }
+      if (ci > 0) { ci--; setTimeout(step, delay); return; }
+      deleting = false; pi = (pi + 1) % TYPED.length; setTimeout(step, 350);
+    })();
+  })();
 
   /* ==========================================================
-     HOME — stats, menu, announcements, countdown, MVP, bars
+     STATS COUNTERS
      ========================================================== */
-  function monthsStrong() {
-    var now = new Date();
-    return Math.max(1, (now.getFullYear() - FOUNDED.year) * 12 + (now.getMonth() - FOUNDED.month) + 1);
+  function monthsSince(m, y) {
+    var now = new Date(), d = new Date(y, m - 1, 1);
+    return Math.max(0, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
   }
-  $('#statsGrid').innerHTML = GUILD_STATS.map(function (s) {
-    var num = s.num === null ? monthsStrong() : s.num;
-    return '<div class="stat-card"><div class="stat-num">' + num + s.suffix + '</div><div class="stat-label">' + s.label + '</div></div>';
-  }).join('');
-
-  $('#menuGrid').innerHTML = MENU.map(function (m) {
-    return '<a class="menu-card" href="' + m.href + '">' +
-      '<span class="menu-num">' + m.n + '</span><span class="menu-go">➤</span>' +
-      '<h4>' + m.t + '</h4><p>' + m.d + '</p></a>';
-  }).join('');
-
-  $('#announceList').innerHTML = ANNOUNCEMENTS.map(function (a) {
-    return '<div class="announce' + (a.warn ? ' warn' : '') + '">' +
-      '<span class="a-date">' + a.date + '</span><h4>' + a.title + '</h4><p>' + a.body + '</p></div>';
-  }).join('');
-
-  function drawCountdown() {
-    var now = new Date();
-    var t = new Date(now.getTime());
-    t.setHours(TOURNAMENT.hour, TOURNAMENT.minute, 0, 0);
-    t.setTime(t.getTime() - TOURNAMENT.offset * 3600000);
-    var diff = t.getTime() - now.getTime();
-    if (diff < 0) diff += 86400000;
-    var d = Math.floor(diff / 86400000), h = Math.floor(diff % 86400000 / 3600000),
-        m = Math.floor(diff % 3600000 / 60000), s = Math.floor(diff % 60000 / 1000);
-    $('#countdown').innerHTML =
-      '<div class="cd-cell"><div class="cd-num">' + String(d).padStart(2, '0') + '</div><div class="cd-label">DAYS</div></div>' +
-      '<div class="cd-cell"><div class="cd-num">' + String(h).padStart(2, '0') + '</div><div class="cd-label">HRS</div></div>' +
-      '<div class="cd-cell"><div class="cd-num">' + String(m).padStart(2, '0') + '</div><div class="cd-label">MIN</div></div>' +
-      '<div class="cd-cell"><div class="cd-num">' + String(s).padStart(2, '0') + '</div><div class="cd-label">SEC</div></div>';
+  function animateCount(el, target, suffix) {
+    var start = null;
+    function frame(ts) {
+      if (!start) start = ts;
+      var p = Math.min(1, (ts - start) / 1400);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString() + suffix;
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   }
-  drawCountdown();
-  setInterval(drawCountdown, 1000);
+  (function buildStats() {
+    var grid = $('#stats');
+    if (!grid) return;
+    grid.innerHTML = GUILD_STATS.map(function (s) {
+      var num = s.num === null ? monthsSince(FOUNDED.month, FOUNDED.year) : s.num;
+      return '<div class="stat-card" data-n="' + num + '" data-s="' + s.suffix + '"><div class="stat-num">0</div><div class="stat-label">' + s.label + '</div></div>';
+    }).join('');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        animateCount(en.target.querySelector('.stat-num'), parseInt(en.target.dataset.n, 10), en.target.dataset.s);
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.4 });
+    $$('.stat-card', grid).forEach(function (c) { io.observe(c); });
+  })();
 
-  $('#mvpCard').innerHTML =
-    '<div class="mvp-avatar">' + MVP.initials + '</div>' +
-    '<div><span class="mvp-tag">★ MVP OF THE WEEK</span><h4>' + MVP.name + '</h4><p>' + MVP.desc + '</p></div>';
+  /* ==========================================================
+     ANNOUNCEMENTS
+     ========================================================== */
+  $('#announcements').innerHTML = ANNOUNCEMENTS.map(function (a) {
+    return '<div class="ann' + (a.warn ? ' warn' : '') + '"><div class="ann-date">' + a.date + '</div><div class="ann-title">' + a.title + '</div><p>' + a.body + '</p></div>';
+  }).join('');
 
-  function renderBars(elId) {
-    $('#' + elId).innerHTML = ROLES.map(function (r) {
-      return '<div class="bar-row"><div class="bar-label"><span>' + r.name + '</span><span>' + r.val + '%</span></div>' +
-        '<div class="bar-track"><div class="bar-fill" style="width:' + r.val + '%"></div></div></div>';
+  /* ==========================================================
+     COUNTDOWN  (next 5:30 PM Nigerian time)
+     ========================================================== */
+  (function countdown() {
+    var box = $('#countdown');
+    if (!box) return;
+    function next() {
+      var now = new Date(), t = new Date(now);
+      t.setUTCHours(TOURNAMENT.hour - TOURNAMENT.offset, TOURNAMENT.minute, 0, 0);
+      if (t <= now) t.setUTCDate(t.getUTCDate() + 1);
+      return t;
+    }
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function tick() {
+      var diff = next() - new Date();
+      if (diff <= 0) {
+        box.innerHTML = '<div class="no-event">● TOURNAMENT LIVE — REPORT IN, WARRIORS!</div>';
+        return;
+      }
+      var d = Math.floor(diff / 86400000), h = Math.floor(diff % 86400000 / 3600000),
+          m = Math.floor(diff % 3600000 / 60000), s = Math.floor(diff % 60000 / 1000);
+      box.innerHTML =
+        '<div class="cd-box"><div class="cd-num">' + pad(d) + '</div><div class="cd-label">DAYS</div></div>' +
+        '<div class="cd-box"><div class="cd-num">' + pad(h) + '</div><div class="cd-label">HOURS</div></div>' +
+        '<div class="cd-box"><div class="cd-num">' + pad(m) + '</div><div class="cd-label">MIN</div></div>' +
+        '<div class="cd-box"><div class="cd-num">' + pad(s) + '</div><div class="cd-label">SEC</div></div>';
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
+
+  /* ==========================================================
+     MVP OF THE WEEK
+     ========================================================== */
+  (function mvp() {
+    var box = $('#mvp');
+    if (!box) return;
+    var idx = 0, timer = null;
+    function renderMvp() {
+      var m = MVP_LIST[idx];
+      box.innerHTML =
+        '<div class="mvp"><h4>★ ' + m.name + '</h4>' +
+        '<span class="badge">' + m.tag + '</span><p>' + m.desc + '</p></div>';
+    }
+    function restart() {
+      if (timer) clearInterval(timer);
+      timer = setInterval(function () { idx = (idx + 1) % MVP_LIST.length; renderMvp(); }, 5000);
+    }
+    box.addEventListener('mouseenter', function () { clearInterval(timer); });
+    box.addEventListener('mouseleave', restart);
+    renderMvp(); restart();
+  })();
+
+  /* ==========================================================
+     TIMELINE + SKILLS (home & guild pages)
+     ========================================================== */
+  function renderTimeline(el) {
+    if (!el) return;
+    el.innerHTML = TIMELINE.map(function (t) {
+      return '<div class="tl-item"><div class="tl-date">' + t.date + '</div><div class="tl-title">' + t.title + '</div><p class="tl-body">' + t.body + '</p></div>';
     }).join('');
   }
-  renderBars('roleBars');
-  renderBars('guildBars');
+  renderTimeline($('#timeline'));
+  renderTimeline($('#timeline2'));
 
-  /* ==========================================================
-     ADMINS
-     ========================================================== */
-  $('#adminGrid').innerHTML = ADMINS.map(function (a) {
-    return '<div class="admin-card"><div class="admin-avatar">' + a.initials + '</div>' +
-      '<h4>' + a.name + '</h4><div class="admin-role">' + a.role + '</div><p>' + a.desc + '</p></div>';
-  }).join('');
-
-  $('#tAdmin').innerHTML = ADMINS.map(function (a) {
-    return '<option>' + a.name + ' — ' + a.role + '</option>';
-  }).join('');
-
-  /* ==========================================================
-     TRYOUTS — WhatsApp submit
-     ========================================================== */
-  $('#tryoutForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var ok = true;
-    var v = { ign: $('#tIgn'), uid: $('#tUid'), age: $('#tAge'), region: $('#tRegion'), style: $('#tStyle'), admin: $('#tAdmin') };
-    [['errTIgn', v.ign], ['errTUid', v.uid], ['errTAge', v.age], ['errTRegion', v.region]].forEach(function (p) {
-      if (!v[p[1].id].value.trim()) { $('#' + p[0]).textContent = 'Required'; ok = false; } else { $('#' + p[0]).textContent = ''; }
-    });
-    if (!v.style.value) { $('#errTStyle').textContent = 'Select a playstyle'; ok = false; } else { $('#errTStyle').textContent = ''; }
-    if (!v.admin.value) { $('#errTAdmin').textContent = 'Select an admin'; ok = false; } else { $('#errTAdmin').textContent = ''; }
-    if (!ok) { toast('Please complete all required fields.', true); return; }
-    var msg = 'RAVAGE ERA TRYOUT APPLICATION%0A' +
-      'IGN: ' + encodeURIComponent(v.ign.value.trim()) + '%0A' +
-      'UID: ' + encodeURIComponent(v.uid.value.trim()) + '%0A' +
-      'AGE: ' + encodeURIComponent(v.age.value.trim()) + '%0A' +
-      'REGION: ' + encodeURIComponent(v.region.value.trim()) + '%0A' +
-      'PLAYSTYLE: ' + encodeURIComponent(v.style.value) + '%0A' +
-      'PREFERRED ADMIN: ' + encodeURIComponent(v.admin.value);
-    var adminName = v.admin.value.split(' — ')[0].trim();
-    var num = (adminName.indexOf('ZEUS') !== -1) ? ZEUS_WA : ZEUS_WA; // route to Zeus web dev inbox
-    window.open('https://wa.me/' + num + '?text=' + msg, '_blank');
-    $('#tryoutForm').reset();
-    openModal('modalTryoutSuccess');
-  });
-  $('#btnTryoutClose').addEventListener('click', function () { closeModal('modalTryoutSuccess'); });
-  $('#btnTryoutViewGuild').addEventListener('click', function () { closeModal('modalTryoutSuccess'); location.hash = '#/guild'; });
-
-  /* ==========================================================
-     CONTACT — email + WhatsApp + FAQ
-     ========================================================== */
-  $('#emailForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var n = $('#cName').value.trim(), em = $('#cEmail').value.trim(), m = $('#cMessage').value.trim();
-    var ok = true;
-    if (!n) { $('#errCName').textContent = 'Required'; ok = false; } else $('#errCName').textContent = '';
-    if (!em || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { $('#errCEmail').textContent = 'Valid email required'; ok = false; } else $('#errCEmail').textContent = '';
-    if (!m) { $('#errCMessage').textContent = 'Required'; ok = false; } else $('#errCMessage').textContent = '';
-    if (!ok) return;
-    window.open('mailto:' + GUILD_EMAIL + '?subject=' + encodeURIComponent('RAVAGE ERA Query from ' + n) + '&body=' + encodeURIComponent(m), '_blank');
-    $('#emailForm').reset();
-    toast('Opening your email app...');
-  });
-
-  $('#waForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var n = $('#wName').value.trim(), p = $('#wPhone').value.trim(), m = $('#wMessage').value.trim();
-    var ok = true;
-    if (!n) { $('#errWName').textContent = 'Required'; ok = false; } else $('#errWName').textContent = '';
-    if (!p) { $('#errWPhone').textContent = 'Required'; ok = false; } else $('#errWPhone').textContent = '';
-    if (!m) { $('#errWMessage').textContent = 'Required'; ok = false; } else $('#errWMessage').textContent = '';
-    if (!ok) return;
-    var msg = 'RAVAGE ERA CONTACT%0AName: ' + encodeURIComponent(n) + '%0APhone: ' + encodeURIComponent(p) + '%0AMessage: ' + encodeURIComponent(m);
-    window.open('https://wa.me/' + ZEUS_WA + '?text=' + msg, '_blank');
-    $('#waForm').reset();
-    toast('Opening WhatsApp...');
-  });
-
-  $('#faqList').innerHTML = FAQS.map(function (f, i) {
-    return '<div class="faq-item"><button class="faq-q" type="button" data-i="' + i + '">' + f.q +
-      '<span class="faq-x">+</span></button><div class="faq-a">' + f.a + '</div></div>';
-  }).join('');
-  $('#faqList').addEventListener('click', function (e) {
-    var btn = e.target.closest('.faq-q');
-    if (!btn) return;
-    var item = btn.parentElement;
-    var wasOpen = item.classList.contains('open');
-    $$('.faq-item').forEach(function (f) { f.classList.remove('open'); });
-    if (!wasOpen) item.classList.add('open');
-  });
-
-  /* ==========================================================
-     GALLERY
-     ========================================================== */
-  var galIndex = 0;
-  function galImg(g) { return g.src; }
-  function renderGallery() {
-    var g = ASSETS[galIndex];
-    var img = $('#galMain');
-    img.src = g.src;
-    img.setAttribute('data-label', g.label);
-    img.onerror = function () { if (this.src !== window.__PH) this.src = window.__PH; };
-    $('#galCounter').textContent = (galIndex + 1) + ' / ' + ASSETS.length;
-    $$('.gal-thumb').forEach(function (t, i) { t.classList.toggle('active', i === galIndex); });
+  function renderSkills(el) {
+    if (!el) return;
+    el.innerHTML = SKILLS.map(function (s) {
+      return '<div class="skill-row" data-pct="' + s.pct + '"><div class="sk-head"><span>' + s.label + '</span><span>' + s.pct + '%</span></div><div class="sk-bar"><div class="sk-fill"></div></div><small>' + s.note + '</small></div>';
+    }).join('');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.querySelector('.sk-fill').style.width = en.target.dataset.pct + '%';
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.4 });
+    $$('.skill-row', el).forEach(function (r) { io.observe(r); });
   }
-  $('#galThumbs').innerHTML = ASSETS.map(function (g, i) {
-    return '<button class="gal-thumb" data-i="' + i + '" aria-label="' + g.label + '" type="button">' +
-      '<img src="' + g.src + '" alt="' + g.label + '" onerror="this.onerror=null;this.src=window.__PH;"></button>';
-  }).join('');
-  function galStep(dir) { galIndex = (galIndex + dir + ASSETS.length) % ASSETS.length; renderGallery(); }
-  $('#btnGalPrev').addEventListener('click', function () { galStep(-1); });
-  $('#btnGalNext').addEventListener('click', function () { galStep(1); });
-  $('#galThumbs').addEventListener('click', function (e) {
-    var t = e.target.closest('.gal-thumb');
-    if (t) { galIndex = parseInt(t.dataset.i, 10); renderGallery(); }
-  });
-  $('#btnGalFull').addEventListener('click', function () {
-    var g = ASSETS[galIndex];
-    $('#galModalImg').src = g.src;
-    $('#galModalImg').onerror = function () { if (this.src !== window.__PH) this.src = window.__PH; };
-    $('#galModalLabel').textContent = g.label;
-    openModal('modalGallery');
-  });
-  $('#btnGalModalClose').addEventListener('click', function () { closeModal('modalGallery'); });
-  renderGallery();
+  renderSkills($('#skills'));
+  renderSkills($('#skills2'));
 
   /* ==========================================================
-     MODAL CLOSE
+     INTERACTIVE TERMINAL
+     ========================================================== */
+  (function terminal() {
+    var body = $('#termBody'), input = $('#termInput');
+    if (!body) return;
+    function line(html, cls) {
+      var div = document.createElement('div');
+      if (cls) div.className = cls;
+      div.innerHTML = html;
+      body.appendChild(div);
+      body.scrollTop = body.scrollHeight;
+    }
+    function run(cmdRaw) {
+      var cmd = String(cmdRaw || '').trim().toLowerCase();
+      line('<span style="color:var(--gold)">RE@RAVAGE-ERA:~$</span> ' + cmd);
+      if (!cmd) { line('Type a command. (help)', 't-err'); return; }
+      if (cmd === 'clear') { body.innerHTML = ''; return; }
+      var res = TERM_COMMANDS[cmd];
+      if (res === undefined) { line('command not found: ' + cmd, 't-err'); line("Type 'help' to list commands."); return; }
+      res.split('\n').forEach(function (r) {
+        line(r.replace(/^> ?/, ''), /BOOYAH/.test(r) ? 't-gold' : '');
+      });
+      line('');
+    }
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { run(input.value); input.value = ''; }
+    });
+    line('<span style="color:var(--mut)">Welcome to the RAVAGE ERA Command Center. Type <b>help</b>.</span>');
+    line('');
+    run('help');
+  })();
+
+  /* ==========================================================
+     DRAGGABLE BOOYAH CLOUD
+     ========================================================== */
+  (function cloud() {
+    var sphere = $('#cloud');
+    if (!sphere) return;
+    var words = CLOUD_WORDS.slice(0, 18), n = words.length, R = 130;
+    var pts = [], golden = Math.PI * (3 - Math.sqrt(5));
+    for (var i = 0; i < n; i++) {
+      var y = 1 - (i / (n - 1)) * 2, rad = Math.sqrt(1 - y * y), th = golden * i;
+      pts.push({ x: Math.cos(th) * rad, y: y, z: Math.sin(th) * rad });
+    }
+    sphere.innerHTML = words.map(function (w) {
+      return '<span class="cw">' + w + '</span>';
+    }).join('');
+    var els = $$('.cw', sphere), rx = -0.35, ry = 0.6, dragging = false, lastX = 0, lastY = 0;
+    function frame() {
+      if (!dragging && !reducedMotion) { ry += 0.0016; rx += 0.0005; }
+      for (var i = 0; i < n; i++) {
+        var p = pts[i];
+        var x1 = p.x * Math.cos(ry) + p.z * Math.sin(ry);
+        var z1 = -p.x * Math.sin(ry) + p.z * Math.cos(ry);
+        var y2 = p.y * Math.cos(rx) - z1 * Math.sin(rx);
+        var z2 = p.y * Math.sin(rx) + z1 * Math.cos(rx);
+        var depth = (z2 + 1) / 2;
+        var el = els[i];
+        el.style.transform = 'translate(-50%,-50%) translate3d(' + (x1 * R) + 'px,' + (y2 * R) + 'px,0) scale(' + (0.72 + depth * 0.55) + ')';
+        el.style.opacity = (0.35 + depth * 0.65).toFixed(2);
+        el.style.zIndex = Math.round(depth * 100);
+        el.style.color = 'hsl(' + Math.round(42 + depth * 20) + ',80%,' + Math.round(45 + depth * 25) + '%)';
+      }
+      if (!reducedMotion) requestAnimationFrame(frame);
+    }
+    if (reducedMotion) { frame(); return; }
+    sphere.addEventListener('pointerdown', function (e) { dragging = true; lastX = e.clientX; lastY = e.clientY; sphere.setPointerCapture(e.pointerId); });
+    sphere.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      ry += (e.clientX - lastX) * 0.005; rx += (e.clientY - lastY) * 0.005;
+      lastX = e.clientX; lastY = e.clientY;
+    });
+    sphere.addEventListener('pointerup', function () { dragging = false; });
+    sphere.addEventListener('pointercancel', function () { dragging = false; });
+    frame();
+  })();
+
+  /* ==========================================================
+     FAQ (accordion)
+     ========================================================== */
+  (function faq() {
+    var list = $('#faqList');
+    if (!list) return;
+    list.innerHTML = FAQ.map(function (f) {
+      return '<div class="faq-item"><button class="faq-q" type="button"><span>' + f.q + '</span><span class="faq-x">+</span></button><div class="faq-a">' + f.a + '</div></div>';
+    }).join('');
+    list.addEventListener('click', function (e) {
+      var q = e.target.closest('.faq-q');
+      if (!q) return;
+      var item = q.parentNode, wasOpen = item.classList.contains('open');
+      $$('.faq-item', list).forEach(function (it) { it.classList.remove('open'); });
+      if (!wasOpen) item.classList.add('open');
+    });
+  })();
+
+  /* ==========================================================
+     MODAL CLOSE + ESC
      ========================================================== */
   $$('.modal').forEach(function (m) {
     m.addEventListener('click', function (e) { if (e.target === m) closeModal(m.id); });
@@ -360,213 +488,693 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAllModals(); });
 
   /* ==========================================================
-     SPIN & WIN — gate + circular wheel
+     ADMINS (contact grid + tryout-select grid)
      ========================================================== */
-  $('#btnWrongCodeClose').addEventListener('click', function () { closeModal('modalWrongCode'); });
-  $('#btnWrongCodeWa').href = 'https://wa.me/' + ZEUS_WA + '?text=' + encodeURIComponent('Hello Zeus web dev, I entered a wrong secret code on the RAVAGE ERA Guild Hub. Please help me get the correct code.');
-
-  function unlockSpin(uid) {
-    $('#spinGate').hidden = true;
-    $('#spinStage').hidden = false;
-    $('#spinUid').value = uid;
-  }
-  $('#spinGateForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var uid = $('#spinUid').value.trim(), code = $('#spinCode').value.trim();
-    var ok = true;
-    if (!uid) { $('#errSpinUid').textContent = 'UID required'; ok = false; } else $('#errSpinUid').textContent = '';
-    if (!code) { $('#errSpinCode').textContent = 'Code required'; ok = false; } else $('#errSpinCode').textContent = '';
-    if (!ok) return;
-    if (code !== SECRET) { openModal('modalWrongCode'); $('#spinCode').value = ''; return; }
-    unlockSpin(uid);
-    $('#spinCode').value = '';
-  });
-
-  // ---- Wheel drawing ----
-  var wheelCtx = $('#wheelCanvas').getContext('2d');
-  var SEGS = 6; // GUN SKIN / NOTHING alternating
-  var segA = (Math.PI * 2) / SEGS;
-  var currentRot = 0;
-  var spinning = false;
-  var wheelInited = false;
-
-  function drawWheel(rot) {
-    var cx = 160, cy = 160, r = 150;
-    wheelCtx.clearRect(0, 0, 320, 320);
-    wheelCtx.save();
-    wheelCtx.translate(cx, cy);
-    wheelCtx.rotate(rot);
-    for (var i = 0; i < SEGS; i++) {
-      var isGun = (i % 2 === 0);
-      wheelCtx.beginPath();
-      wheelCtx.moveTo(0, 0);
-      wheelCtx.arc(0, 0, r, i * segA, (i + 1) * segA);
-      wheelCtx.closePath();
-      wheel
-$$
-wheelCtx.fillStyle = isGun ? '#f5c542' : '#141824';
-      wheelCtx.fill();
-      wheelCtx.strokeStyle = 'rgba(255,255,255,.25)';
-      wheelCtx.lineWidth = 1;
-      wheelCtx.stroke();
-
-      // Label (text drawn un-rotated)
-      wheelCtx.save();
-      wheelCtx.rotate(i * segA + segA / 2);
-      wheelCtx.textAlign = 'right';
-      wheelCtx.fillStyle = isGun ? '#1a1205' : '#9aa0ad';
-      wheelCtx.font = 'bold 13px Orbitron, Arial';
-      wheelCtx.fillText(isGun ? 'GUN SKIN' : 'NOTHING', r - 14, 4);
-      wheelCtx.restore();
-    }
-    // Center hub
-    wheelCtx.beginPath();
-    wheelCtx.arc(0, 0, 26, 0, Math.PI * 2);
-    wheelCtx.fillStyle = '#06070a';
-    wheelCtx.fill();
-    wheelCtx.strokeStyle = '#f5c542';
-    wheelCtx.lineWidth = 3;
-    wheelCtx.stroke();
-    wheelCtx.fillStyle = '#f5c542';
-    wheelCtx.font = 'bold 12px Orbitron, Arial';
-    wheelCtx.textAlign = 'center';
-    wheelCtx.fillText('SPIN', 0, 4);
-    wheelCtx.restore();
+  function adminCard(a, mode) {
+    var attr = mode === 'select'
+      ? 'data-select-admin="' + a.wa + '"'
+      : 'data-contact-admin="' + a.wa + '"';
+    var label = mode === 'select' ? 'SELECT ADMIN' : 'CONTACT ON WHATSAPP';
+    var cls = mode === 'select' ? 'btn btn-gold btn-sm' : 'btn btn-red btn-sm';
+    return '<article class="admin-card rank-' + a.rank + '">' +
+      '<div class="admin-avatar">' + initials(a.name) + '</div>' +
+      '<h4>' + a.name + '</h4>' +
+      '<span class="badge">' + a.pos + '</span>' +
+      '<p>' + a.desc + '</p>' +
+      '<button class="' + cls + '" ' + attr + ' type="button">' + label + '</button>' +
+    '</article>';
   }
 
-  function initWheel() {
-    if (wheelInited) return;
-    wheelInited = true;
-    drawWheel(currentRot);
-  }
+  $('#adminsGrid').innerHTML = ADMINS.map(function (a) { return adminCard(a, 'contact'); }).join('');
+  $('#tryoutAdminGrid').innerHTML = ADMINS.map(function (a) { return adminCard(a, 'select'); }).join('');
 
-  // Weighted outcome: ~35% GUN SKIN, ~65% NOTHING
-  function spinOutcome() {
-    return Math.random() < 0.35 ? 'GUN SKIN' : 'NOTHING';
-  }
-
-  $('#btnSpin').addEventListener('click', function () {
-    if (spinning) return;
-    spinning = true;
-    $('#spinResult').textContent = '';
-
-    var outcome = spinOutcome();                                   // decide result first
-    var winIndex = (outcome === 'GUN SKIN') ? 0 : 1;               // segment index
-    var targetSeg = winIndex * segA + segA / 2;                    // angle at 12 o'clock
-
-    // Bring target segment to the pointer (top = -PI/2), add 5–7 full spins + jitter
-    var targetRot = -(Math.PI / 2) - targetSeg + Math.PI * 2 * rand(5, 7) + (Math.random() * 0.35 - 0.17);
-
-    var start = currentRot;
-    var delta = targetRot - start;
-    var duration = 4200;
-    var t0 = null;
-
-    function frame(ts) {
-      if (!t0) t0 = ts;
-      var p = Math.min(1, (ts - t0) / duration);
-      var ease = 1 - Math.pow(1 - p, 3); // cubic ease-out
-      currentRot = start + delta * ease;
-      drawWheel(currentRot);
-      if (p < 1) {
-        requestAnimationFrame(frame);
-      } else {
-        spinning = false;
-        showSpinResult(outcome);
-      }
-    }
-    requestAnimationFrame(frame);
-  });
-
-  function showSpinResult(outcome) {
-    $('#spinResult').textContent = outcome === 'GUN SKIN' ? '🎉 YOU WON — GUN SKIN!' : 'NOTHING THIS TIME. SPIN AGAIN!';
-    $('#spinResult').className = 'spin-result ' + (outcome === 'GUN SKIN' ? 'win' : 'lose');
-
-    $('#spinModalCheck').textContent = outcome === 'GUN SKIN' ? '🏆' : '—';
-    $('#spinModalCheck').className = 'modal-check' + (outcome === 'GUN SKIN' ? '' : ' modal-check-red');
-    $('#spinModalTitle').textContent = outcome === 'GUN SKIN' ? 'CONGRATULATIONS!' : 'BETTER LUCK NEXT TIME';
-    $('#spinModalTitle').className = outcome === 'GUN SKIN' ? 'glow-gold' : 'glow-red';
-    $('#spinModalText').textContent = outcome === 'GUN SKIN' ? 'You won a GUN SKIN!' : 'The wheel landed on NOTHING.';
-    $('#spinModalBody').hidden = false;
-    $('#spinModalThanks').hidden = true;
-    $('#btnSpinModalNext').hidden = false;
-    $('#btnSpinModalClose').hidden = true;
-    openModal('modalSpin');
-  }
-
-  // Modal: "will enter within 2 to 5 hrs" first, then thanks
-  $('#btnSpinModalNext').addEventListener('click', function () {
-    $('#spinModalBody').hidden = true;
-    $('#spinModalThanks').hidden = false;
-    $('#btnSpinModalNext').hidden = true;
-    $('#btnSpinModalClose').hidden = false;
-  });
-  $('#btnSpinModalClose').addEventListener('click', function () {
-    closeModal('modalSpin');
-    $('#spinModalBody').hidden = false;
-    $('#spinModalThanks').hidden = true;
-    $('#btnSpinModalNext').hidden = false;
-    $('#btnSpinModalClose').hidden = true;
+  $('#adminsGrid').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-contact-admin]');
+    if (!btn) return;
+    var a = ADMINS.filter(function (x) { return x.wa === btn.getAttribute('data-contact-admin'); })[0];
+    if (a) { openWa(a.wa); toast('WhatsApp opened for ' + a.name); }
   });
 
   /* ==========================================================
-     LIKES & VISITS — gate + sliders (min 10 / max 100)
+     TRYOUTS
      ========================================================== */
-  $('#btnLikesModalNext').addEventListener('click', function () {
-    $('#likesModalBody').hidden = true;
-    $('#likesModalThanks').hidden = false;
-    $('#btnLikesModalNext').hidden = true;
-    $('#btnLikesModalClose').hidden = false;
+  var tryoutHero = $('#tryoutHero');
+  var tryoutFormPanel = $('#tryoutFormPanel');
+  var tryoutAdminPanel = $('#tryoutAdminPanel');
+  var tryoutPhotoFile = null;
+  var tryoutData = {};
+
+  $('#btnStartTryout').addEventListener('click', function () {
+    tryoutHero.hidden = true;
+    tryoutFormPanel.hidden = false;
   });
-  $('#btnLikesModalClose').addEventListener('click', function () {
-    closeModal('modalLikes');
-    $('#likesModalBody').hidden = false;
-    $('#likesModalThanks').hidden = true;
-    $('#btnLikesModalNext').hidden = false;
-    $('#btnLikesModalClose').hidden = true;
+  $('#btnTryoutBack').addEventListener('click', function () {
+    tryoutFormPanel.hidden = true;
+    tryoutHero.hidden = false;
+  });
+  $('#btnAdminBack').addEventListener('click', function () {
+    tryoutAdminPanel.hidden = true;
+    tryoutFormPanel.hidden = false;
   });
 
-  $('#likesGateForm').addEventListener('submit', function (e) {
+  $('#tryoutPhoto').addEventListener('change', function () {
+    var f = this.files[0];
+    if (!f) return;
+    if (!f.type.match(/^image\//)) { setErr('errTryoutPhoto', 'Please choose an image file.'); return; }
+    tryoutPhotoFile = f;
+    $('#tryoutPhotoName').textContent = f.name;
+    $('#tryoutPhotoPreview').src = URL.createObjectURL(f);
+    $('#tryoutPhotoPreviewWrap').hidden = false;
+    setErr('errTryoutPhoto', '');
+    markField('tryoutPhoto', true);
+  });
+  $('#tryoutPhotoClear').addEventListener('click', function () {
+    tryoutPhotoFile = null;
+    $('#tryoutPhoto').value = '';
+    $('#tryoutPhotoName').textContent = 'Upload Profile';
+    $('#tryoutPhotoPreviewWrap').hidden = true;
+  });
+
+  $('#tryoutForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    var uid = $('#likesUid').value.trim(), code = $('#likesCode').value.trim();
+    var name = $('#tryoutName').value.trim();
+    var uid = $('#tryoutUid').value.trim();
+    var email = $('#tryoutEmail').value.trim();
+    var phone = $('#tryoutPhone').value.trim();
     var ok = true;
-    if (!uid) { $('#errLikesUid').textContent = 'UID required'; ok = false; } else $('#errLikesUid').textContent = '';
-    if (!code) { $('#errLikesCode').textContent = 'Code required'; ok = false; } else $('#errLikesCode').textContent = '';
-    if (!ok) return;
-    if (code !== SECRET) { openModal('modalWrongCode'); $('#likesCode').value = ''; return; }
-    $('#likesGate').hidden = true;
-    $('#likesStage').hidden = false;
-    $('#likesUidFinal').value = uid;
-    $('#likesCode').value = '';
+    ok = validateField('tryoutName', 'errTryoutName', name.length >= 2, 'In-game name is required.') && ok;
+    ok = validateField('tryoutUid', 'errTryoutUid', uid.length >= 4, 'UID is required.') && ok;
+    ok = validateField('tryoutEmail', 'errTryoutEmail', email === '' || isEmail(email), email ? 'Enter a valid email.' : '') && ok;
+    ok = validateField('tryoutPhone', 'errTryoutPhone', isPhone(phone), 'A valid phone number is required.') && ok;
+    ok = validateField('tryoutPhoto', 'errTryoutPhoto', !!tryoutPhotoFile, 'Profile photo is required.') && ok;
+    if (!ok) { toast('Please fix the highlighted fields.'); return; }
+    tryoutData = { name: name, uid: uid, email: email, phone: phone };
+    tryoutFormPanel.hidden = true;
+    tryoutAdminPanel.hidden = false;
+    window.scrollTo({ top: 0 });
   });
 
-  var likesRange = $('#likesRange'), visitsRange = $('#visitsRange');
-  function syncRanges() {
-    $('#likesVal').textContent = likesRange.value;
-    $('#visitsVal').textContent = visitsRange.value;
+  $('#tryoutAdminGrid').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-select-admin]');
+    if (!btn) return;
+    var a = ADMINS.filter(function (x) { return x.wa === btn.getAttribute('data-select-admin'); })[0];
+    if (!a) return;
+    var msg = [
+      'RAVAGE ERA TRYOUT APPLICATION', '',
+      'In-game name: ' + tryoutData.name,
+      'UID: ' + tryoutData.uid,
+      'Email: ' + (tryoutData.email || 'Not provided'),
+      'Phone: ' + tryoutData.phone,
+      '', 'Selected admin: ' + a.name + ' (' + a.pos + ')'
+    ].join('\n');
+    openWa(a.wa, msg);
+    openModal('modalTryoutSuccess');
+  });
+  $('#btnTryoutClose').addEventListener('click', function () { closeModal('modalTryoutSuccess'); });
+  $('#btnTryoutViewGuild').addEventListener('click', function () {
+    closeModal('modalTryoutSuccess');
+    location.hash = '#/guild';
+  });
+
+  /* ==========================================================
+     SPIN & WIN — CIRCULAR WHEEL (GUN SKIN / NOTHING)
+     8 segments · real 50/50 · lands under the pointer
+     ========================================================== */
+  var wheel = $('#wheel');
+  var SEG = 8, SEG_DEG = 360 / SEG, WHEEL_D = Math.round(150 * 0.68);
+
+  (function buildWheel() {
+    var stops = [], labels = '';
+    for (var i = 0; i < SEG; i++) {
+      var isWin = (i % 2 === 0);            // 0,2,4,6 = GUN SKIN · 1,3,5,7 = NOTHING
+      var from = i * SEG_DEG, to = (i + 1) * SEG_DEG;
+      stops.push((isWin ? '#f5c142' : '#16162b') + ' ' + from + 'deg ' + to + 'deg');
+      var A = i * SEG_DEG + SEG_DEG / 2;    // segment center (wheel-local, clockwise from top)
+      var rot = A + 90;
+      var color = isWin ? '#1a0b2e' : '#8f9bb3';
+      var text = isWin ? 'GUN SKIN' : 'NOTHING';
+      labels += '<span class="seg-label" style="width:80px;font-size:10.5px;white-space:nowrap;color:' + color +
+        ';transform:translate(-50%,-50%) rotate(' + rot + 'deg) translateY(-' + WHEEL_D + 'px) rotate(-' + rot + 'deg)">' + text + '</span>';
+    }
+    wheel.style.background = 'conic-gradient(from 90deg, ' + stops.join(',') + ')';
+    wheel.insertAdjacentHTML('beforeend', labels);
+  })();
+
+  var spinning = false;
+  var rotation = 0;
+
+  $('#btnSpinUnlock').addEventListener('click', function () {
+    var uid = $('#spinUid').value.trim();
+    var code = $('#spinCode').value;
+    var ok = true;
+    ok = validateField('spinUid', 'errSpinUid', uid.length >= 4, 'UID is required.') && ok;
+    ok = validateField('spinCode', 'errSpinCode', code === SECRET, 'Incorrect secret code.') && ok;
+    if (!ok) {
+      $('#spinPinHelp').hidden = false;
+      toast('Incorrect code — contact ZEUS on WhatsApp.');
+      return;
+    }
+    $('#spinPinHelp').hidden = true;
+    $('#spinGate').hidden = true;
+    $('#spinWheel').hidden = false;
+    window.scrollTo({ top: 0 });
+  });
+
+  $('#btnSpinPinWa').addEventListener('click', function () {
+    openWa(ZEUS_WA, 'I entered a wrong code on the SPIN & WIN page of the RAVAGE ERA Guild Hub. Please send me the code.');
+  });
+
+  function showSpinOutcome(win) {
+    var out = $('#spinOutcome');
+    out.hidden = false;
+    if (win) {
+      out.className = 'outcome win';
+      out.innerHTML = '<div>🎉 GUN SKIN!</div>' +
+        '<p>The wheel landed on GUN SKIN. Claim your reward below.</p>' +
+        '<button id="btnSpinGoClaim" class="btn btn-gold" type="button">CLAIM YOUR REWARD →</button>';
+      $('#btnSpinGoClaim').addEventListener('click', function () {
+        $('#spinWheel').hidden = true;
+        $('#spinClaim').hidden = false;
+        window.scrollTo({ top: 0 });
+      });
+    } else {
+      out.className = 'outcome lose';
+      out.innerHTML = '<div>NOTHING this time.</div>' +
+        '<p>The wheel landed on NOTHING. Spin again, warrior — We Stand United.</p>' +
+        '<button id="btnSpinAgain" class="btn btn-ghost" type="button">SPIN AGAIN</button>';
+      $('#btnSpinAgain').addEventListener('click', function () { out.hidden = true; });
+    }
   }
-  likesRange.addEventListener('input', syncRanges);
-  visitsRange.addEventListener('input', syncRanges);
-  syncRanges();
 
-  $('#likesForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var uid = $('#likesUidFinal').value.trim();
-    var likes = parseInt(likesRange.value, 10);
-    var visits = parseInt(visitsRange.value, 10);
-    // Hard clamp 10–100 (belt and braces — inputs already enforce it)
-    likes = Math.min(100, Math.max(10, likes));
-    visits = Math.min(100, Math.max(10, visits));
-    var msg = 'RAVAGE ERA LIKES & VISITS REQUEST%0A' +
-      'UID: ' + encodeURIComponent(uid) + '%0A' +
-      'LIKES: ' + likes + '%0A' +
-      'PROFILE VISITS: ' + visits + '%0A' +
-      'Delivery expected: 2 to 5 hours.';
-    window.open('https://wa.me/' + ZEUS_WA + '?text=' + msg, '_blank');
-    $('#likesModalText').textContent = likes + ' likes + ' + visits + ' profile visits for UID ' + uid;
-    $('#likesModalBody').hidden = false;
-    $('#likesModalThanks').hidden = true;
-    $('#btnLikesModalNext').hidden = false;
-    $('#btnLikesModalClose').hidden = true;
-    openModal('modalLikes');
+  $('#btnSpinStart').addEventListener('click', function () {
+    if (spinning) return;
+    spinning = true;
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'SPINNING...';
+    $('#spinOutcome').hidden = true;
+
+    var win = Math.random() < 0.5;                        // real 50/50
+    var candidates = win ? [0, 2, 4, 6] : [1, 3, 5, 7];
+    var seg = candidates[Math.floor(Math.random() * 4)];
+    var jitter = (Math.random() * 16) - 8;                // ±8° — stays inside the 45° segment
+    var target = ((247.5 - seg * SEG_DEG + jitter) % 360 + 360) % 360;
+    var spins = 5 + Math.floor(Math.random() * 3);        // 5–7 full rotations
+    var cur = rotation % 360;
+    var delta = ((target - cur) % 360 + 360) % 360;
+    rotation += spins * 360 + delta;
+    wheel.style.transform = 'rotate(' + rotation + 'deg)';
+
+    setTimeout(function () {
+      spinning = false;
+      btn.disabled = false;
+      btn.textContent = 'SPIN';
+      showSpinOutcome(win);
+    }, 4300);
   });
+
+  /* ---- Spin claim (win only) ---- */
+  var spinShotFile = null;
+
+  $('#btnSpinBack').addEventListener('click', function () {
+    $('#spinClaim').hidden = true;
+    $('#spinWheel').hidden = false;
+  });
+
+  $('#spinShot').addEventListener('change', function () {
+    var f = this.files[0];
+    if (!f) return;
+    if (!f.type.match(/^image\//)) { setErr('errSpinShot', 'Please choose an image file.'); return; }
+    spinShotFile = f;
+    $('#spinShotName').textContent = f.name;
+    $('#spinShotPreview').src = URL.createObjectURL(f);
+    $('#spinShotPreviewWrap').hidden = false;
+    setErr('errSpinShot', '');
+  });
+  $('#btnSpinShotClear').addEventListener('click', function () {
+    spinShotFile = null;
+    $('#spinShot').value = '';
+    $('#spinShotName').textContent = 'Upload Screenshot';
+    $('#spinShotPreviewWrap').hidden = true;
+  });
+
+  $('#btnSpinClaimNext').addEventListener('click', function () {
+    var uid = $('#claimUid').value.trim();
+    var ok = validateField('claimUid', 'errClaimUid', uid.length >= 4, 'UID is required.');
+    if (!ok) { toast('Please fix the highlighted fields.'); return; }
+    var msg = [
+      'RAVAGE ERA SPIN & WIN — REWARD CLAIM', '',
+      'UID: ' + uid,
+      'Reward: GUN SKIN',
+      'Screenshot attached: ' + (spinShotFile ? 'YES' : 'NO'),
+      'Claim confirmed: YES — I confirm my participation in the RAVAGE ERA Spin & Win community promotion.'
+    ].join('\n');
+    openWa(ZEUS_WA, msg);
+    openModal('modalSpinProcess');     // → "entered within 2 to 5 hours"
+  });
+
+  $('#btnSpinProcessOk').addEventListener('click', function () {
+    closeModal('modalSpinProcess');
+    openModal('modalSpinThanks');      // → thanks message
+  });
+
+  $('#btnSpinThanksClose').addEventListener('click', function () {
+    closeModal('modalSpinThanks');
+    $('#spinClaim').hidden = true;
+    $('#spinWheel').hidden = false;
+    $('#spinOutcome').hidden = true;
+    $('#claimUid').value = '';
+    $('#spinShot').value = '';
+    spinShotFile = null;
+    $('#spinShotName').textContent = 'Upload Screenshot';
+    $('#spinShotPreviewWrap').hidden = true;
+    setErr('errClaimUid', '');
+    setErr('errSpinShot', '');
+    window.scrollTo({ top: 0 });
+  });
+
+  /* ==========================================================
+     LIKES & VISITS (min 10 — max 100)
+     ========================================================== */
+  $('#btnLikesUnlock').addEventListener('click', function () {
+    var uid = $('#likesUid').value.trim();
+    var code = $('#likesCode').value;
+    var ok = true;
+    ok = validateField('likesUid', 'errLikesUid', uid.length >= 4, 'UID is required.') && ok;
+    ok = validateField('likesCode', 'errLikesCode', code === SECRET, 'Incorrect secret code.') && ok;
+    if (!ok) {
+      $('#likesPinHelp').hidden = false;
+      toast('Incorrect code — contact ZEUS on WhatsApp.');
+      return;
+    }
+    $('#likesPinHelp').hidden = true;
+    $('#likesSummaryUid').textContent = uid;
+    $('#likesGate').hidden = true;
+    $('#likesConfirm').hidden = false;
+    window.scrollTo({ top: 0 });
+  });
+
+  $('#btnLikesPinWa').addEventListener('click', function () {
+    openWa(ZEUS_WA, 'I entered a wrong code on the LIKES & VISITS page of the RAVAGE ERA Guild Hub. Please send me the code.');
+  });
+
+  $('#likesSlider').addEventListener('input', function () {
+    $('#likesAmount').textContent = this.value;
+  });
+
+  $('#btnLikesBack').addEventListener('click', function () {
+    $('#likesConfirm').hidden = true;
+    $('#likesGate').hidden = false;
+  });
+
+  $('#btnLikesContinue').addEventListener('click', function () {
+    var uid = $('#likesSummaryUid').textContent;
+    var amount = $('#likesSlider').value;
+    var msg = [
+      'RAVAGE ERA LIKES / PROFILE VISITS REQUEST', '',
+      'UID: ' + uid,
+      'Amount: ' + amount,
+      'Service: Free Fire likes & profile visits (RAVAGE ERA community service)'
+    ].join('\n');
+    openWa(ZEUS_WA, msg);
+    $('#likesProcessAmount').textContent = amount;
+    openModal('modalLikesProcess');    // → "entered within 2 to 5 hours"
+  });
+
+  $('#btnLikesProcessOk').addEventListener('click', function () {
+    closeModal('modalLikesProcess');
+    openModal('modalLikesThanks');     // → thanks message
+  });
+
+  $('#btnLikesThanksClose').addEventListener('click', function () {
+    closeModal('modalLikesThanks');
+    $('#likesConfirm').hidden = true;
+    $('#likesGate').hidden = false;
+    $('#likesUid').value = '';
+    $('#likesCode').value = '';
+    $('#likesSlider').value = 50;
+    $('#likesAmount').textContent = '50';
+    setErr('errLikesUid', '');
+    setErr('errLikesCode', '');
+    $('#likesPinHelp').hidden = true;
+    window.scrollTo({ top: 0 });
+  });
+
+  /* ==========================================================
+     SENSI CONFIGURATION — 5-STEP WIZARD
+     ========================================================== */
+  var PHONES = [
+    { icon: '🍎', name: 'iPhone' },
+    { icon: '📱', name: 'Samsung Galaxy' },
+    { icon: '📱', name: 'Tecno' },
+    { icon: '📱', name: 'Infinix' },
+    { icon: '📱', name: 'Itel' },
+    { icon: '📱', name: 'Xiaomi Redmi' },
+    { icon: '📱', name: 'Oppo' },
+    { icon: '📱', name: 'Vivo' },
+    { icon: '📱', name: 'Nokia' },
+    { icon: '📱', name: 'Huawei' },
+    { icon: '📱', name: 'Realme' },
+    { icon: '📱', name: 'OnePlus' },
+    { icon: '🤖', name: 'Google Pixel' },
+    { icon: '🎮', name: 'Asus ROG' },
+    { icon: '📱', name: 'Motorola' }
+  ];
+
+  var SENSI_STEPS = ['PHONE TYPE', 'FULL PHONE NAME', 'FINGERS', 'DPI', 'PIN'];
+  var sensi = { phone: '', fullName: '', fingers: null, dpi: null };
+
+  function sensiGo(n) {
+    for (var i = 1; i <= 5; i++) {
+      var el = $('#sensiStep' + i);
+      if (el) el.hidden = (i !== n);
+    }
+    $('#sensiSteps').textContent = 'STEP ' + n + ' / 5 — ' + SENSI_STEPS[n - 1];
+    window.scrollTo({ top: 0 });
+  }
+
+  $('#phoneGrid').innerHTML = PHONES.map(function (p) {
+    return '<button class="phone-btn" data-phone="' + p.name + '" type="button"><span class="p-icon">' + p.icon + '</span>' + p.name + '</button>';
+  }).join('');
+
+  $('#phoneGrid').addEventListener('click', function (e) {
+    var b = e.target.closest('.phone-btn');
+    if (!b) return;
+    $$('.phone-btn').forEach(function (x) { x.classList.remove('sel'); });
+    b.classList.add('sel');
+    sensi.phone = b.dataset.phone;
+    sensiGo(2);
+  });
+
+  $$('[data-sback]').forEach(function (b) {
+    b.addEventListener('click', function () { sensiGo(parseInt(b.dataset.sback, 10)); });
+  });
+
+  $('#btnSensiNext3').addEventListener('click', function () {
+    var name = $('#sensiPhone').value.trim();
+    if (name.length < 2) {
+      setErr('errSensiPhone', 'Enter your full phone name (e.g. iPhone 13 Pro Max).');
+      toast('Please enter your phone full name.');
+      return;
+    }
+    sensi.fullName = name;
+    setErr('errSensiPhone', '');
+    sensiGo(3);
+  });
+
+  $('#fingerOptions').innerHTML = [2, 3, 4].map(function (f) {
+    return '<button class="opt-btn" data-fingers="' + f + '" type="button">' + f + ' FINGERS</button>';
+  }).join('');
+
+  $('#fingerOptions').addEventListener('click', function (e) {
+    var b = e.target.closest('.opt-btn');
+    if (!b) return;
+    $$('.opt-btn', this).forEach(function (x) { x.classList.remove('sel'); });
+    b.classList.add('sel');
+    sensi.fingers = parseInt(b.dataset.fingers, 10);
+    sensiGo(4);
+  });
+
+  $('#dpiOptions').innerHTML = ['LOW', 'MEDIUM', 'HIGH'].map(function (d) {
+    return '<button class="opt-btn" data-dpi="' + d + '" type="button">' + d + '</button>';
+  }).join('');
+
+  $('#dpiOptions').addEventListener('click', function (e) {
+    var b = e.target.closest('.opt-btn');
+    if (!b) return;
+    $$('.opt-btn', this).forEach(function (x) { x.classList.remove('sel'); });
+    b.classList.add('sel');
+    sensi.dpi = b.dataset.dpi;
+    sensiGo(5);
+  });
+
+  /* PIN check — wrong PIN → contact owner */
+  $('#btnSensiGenerate').addEventListener('click', function () {
+    var pin = $('#sensiPin').value;
+    if (pin !== SECRET) {
+      setErr('errSensiPin', 'Incorrect PIN.');
+      $('#sensiPinHelp').hidden = false;
+      toast('Incorrect PIN — contact the owner for the PIN.');
+      return;
+    }
+    setErr('errSensiPin', '');
+    $('#sensiPinHelp').hidden = true;
+    generateSensi();
+  });
+
+  $('#btnSensiPinWa').addEventListener('click', function () {
+    openWa(ZEUS_WA, 'I entered a wrong PIN on the SENSI page of the RAVAGE ERA Guild Hub. Please send me the PIN.');
+  });
+
+  /* ---- Sensi generation ---- */
+  function ri(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  var SENSI_SETTINGS = [
+    { name: 'GENERAL', min: 100, max: 170 },
+    { name: 'RED DOT', min: 70, max: 120 },
+    { name: '2X SCOPE', min: 60, max: 110 },
+    { name: '4X SCOPE', min: 50, max: 100 },
+    { name: 'SNIPER SCOPE', min: 50, max: 90 },
+    { name: 'FREE LOOK', min: 80, max: 140 }
+  ];
+
+  function generateSensi() {
+    var fire = ri(43, 50);   // fire button: 43%–50% (random)
+    var rows = SENSI_SETTINGS.map(function (s) {
+      var v = ri(s.min, s.max);   // everything else: 50–170
+      return '<div class="sensi-row"><span>' + s.name + '</span><b>' + v + '%</b></div>';
+    }).join('') +
+      '<div class="sensi-row"><span class="fire">🔥 FIRE BUTTON SIZE</span><b>' + fire + '%</b></div>';
+
+    $('#sensiList').innerHTML = rows;
+    $('#sensiPhoneLabel').textContent = sensi.phone + ' — ' + sensi.fullName;
+    $('#sensiMeta').textContent = sensi.fingers + ' FINGERS · DPI: ' + sensi.dpi;
+
+    $('#sensiStep5').hidden = true;
+    $('#sensiResult').hidden = false;
+    window.scrollTo({ top: 0 });
+  }
+
+  /* Copy / share use the EXACT numbers shown on screen */
+  function readShownSensi() {
+    return $$('.sensi-row', $('#sensiList')).map(function (row) {
+      return row.querySelector('span').textContent.trim() + ': ' + row.querySelector('b').textContent.trim();
+    }).join('\n');
+  }
+
+  $('#btnSensiCopy').addEventListener('click', function () {
+    var text = 'RAVAGE ERA SENSI — ' + sensi.phone + ' ' + sensi.fullName + '\n' +
+      sensi.fingers + ' fingers · DPI: ' + sensi.dpi + '\n' + readShownSensi();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { toast('Sensi copied to clipboard!'); });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); toast('Sensi copied to clipboard!'); } catch (err) { toast('Could not copy.'); }
+      ta.remove();
+    }
+  });
+
+  $('#btnSensiWa').addEventListener('click', function () {
+    var text = 'RAVAGE ERA SENSI SETTINGS 🎯\n' +
+      'Phone: ' + sensi.phone + ' ' + sensi.fullName + '\n' +
+      'Fingers: ' + sensi.fingers + ' | DPI: ' + sensi.dpi + '\n' + readShownSensi();
+    openWa(ZEUS_WA, text);
+    toast('WhatsApp opened — your sensi is ready to send.');
+  });
+
+  $('#btnSensiReset').addEventListener('click', function () {
+    sensi = { phone: '', fullName: '', fingers: null, dpi: null };
+    $('#sensiResult').hidden = true;
+    $('#sensiPin').value = '';
+    $('#sensiPhone').value = '';
+    $$('.phone-btn').forEach(function (x) { x.classList.remove('sel'); });
+    $$('.opt-btn').forEach(function (x) { x.classList.remove('sel'); });
+    setErr('errSensiPin', '');
+    $('#sensiPinHelp').hidden = true;
+    sensiGo(1);
+  });
+
+  /* ==========================================================
+     GALLERY (swipe + thumbnails + fullscreen modal)
+     ========================================================== */
+  var galIndex = 0;
+  var galFeatured = $('#galFeatured');
+  var galLabel = $('#galLabel');
+  var galCounter = $('#galCounter');
+
+  function renderGallery() {
+    var g = ASSETS[galIndex];
+    galFeatured.src = g.src;
+    galFeatured.setAttribute('data-label', g.label);
+    galLabel.textContent = g.label;
+    galCounter.textContent = (galIndex + 1) + ' / ' + ASSETS.length;
+    $$('.gal-thumb').forEach(function (t, i) {
+      t.classList.toggle('active', i === galIndex);
+    });
+  }
+
+  $('#galThumbs').innerHTML = ASSETS.map(function (g, i) {
+    return '<button class="gal-thumb" data-i="' + i + '" aria-label="' + g.label + '" type="button">' +
+      '<img src="' + g.src + '" data-label="' + g.label + '" alt="' + g.label + '"></button>';
+  }).join('');
+
+  function galStep(dir) {
+    galIndex = (galIndex + dir + ASSETS.length) % ASSETS.length;
+    renderGallery();
+  }
+
+  $('#btnGalPrev').addEventListener('click', function () { galStep(-1); });
+  $('#btnGalNext').addEventListener('click', function () { galStep(1); });
+
+  $('#galThumbs').addEventListener('click', function (e) {
+    var t = e.target.closest('.gal-thumb');
+    if (t) { galIndex = parseInt(t.dataset.i, 10); renderGallery(); }
+  });
+
+  var touchX = null;
+  var galMain = $('#galMain');
+  galMain.addEventListener('touchstart', function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });
+  galMain.addEventListener('touchend', function (e) {
+    if (touchX === null) return;
+    var dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) galStep(dx < 0 ? 1 : -1);
+    touchX = null;
+  }, { passive: true });
+
+  $('#btnGalFull').addEventListener('click', function () {
+    var g = ASSETS[galIndex];
+    $('#galModalImg').src = g.src;
+    $('#galModalImg').setAttribute('data-label', g.label);
+    $('#galModalLabel').textContent = g.label;
+    openModal('modalGallery');
+  });
+  $('#btnGalModalClose').addEventListener('click', function () { closeModal('modalGallery'); });
+
+  renderGallery();
+
+  /* ==========================================================
+     PROFILES
+     ========================================================== */
+  $('#profilesGrid').innerHTML = ASSETS.map(function (g, i) {
+    return '<article class="profile-card">' +
+      '<img class="p-img" src="' + g.src + '" data-label="' + g.label + '" alt="' + g.label + '" loading="lazy">' +
+      '<div class="p-body"><div class="p-badges"><span>PROFILE</span><span>GALLERY</span></div>' +
+      '<h4>' + g.label + '</h4>' +
+      '<button class="btn btn-gold btn-sm" data-view="' + i + '" type="button">VIEW</button></div>' +
+    '</article>';
+  }).join('');
+
+  $('#profilesGrid').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-view]');
+    if (!btn) return;
+    var g = ASSETS[parseInt(btn.dataset.view, 10)];
+    $('#profModalImg').src = g.src;
+    $('#profModalImg').setAttribute('data-label', g.label);
+    $('#profModalLabel').textContent = g.label;
+    openModal('modalProfile');
+  });
+  $('#btnProfModalClose').addEventListener('click', function () { closeModal('modalProfile'); });
+
+  /* ==========================================================
+     CONTACT — EMAIL + WHATSAPP
+     ========================================================== */
+  $('#emailForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('#cName').value.trim();
+    var email = $('#cEmail').value.trim();
+    var message = $('#cMessage').value.trim();
+    var ok = true;
+    ok = validateField('cName', 'errCName', name.length >= 2, 'Name is required.') && ok;
+    ok = validateField('cEmail', 'errCEmail', isEmail(email), 'A valid email is required.') && ok;
+    ok = validateField('cMessage', 'errCMessage', message.length >= 5, 'Message is required.') && ok;
+    if (!ok) { toast('Please fix the highlighted fields.'); return; }
+    var subject = 'RAVAGE ERA GUILD QUERY';
+    var body = [
+      'RAVAGE ERA WEBSITE QUERY', '',
+      'Name: ' + name,
+      'Email: ' + email,
+      '', 'Message:', message
+    ].join('\n');
+    window.location.href = 'mailto:' + GUILD_EMAIL +
+      '?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(body);
+    toast('Opening your email app with the query pre-filled...');
+  });
+
+  $('#waForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('#wName').value.trim();
+    var phone = $('#wPhone').value.trim();
+    var message = $('#wMessage').value.trim();
+    var ok = true;
+    ok = validateField('wName', 'errWName', name.length >= 2, 'Name is required.') && ok;
+    ok = validateField('wPhone', 'errWPhone', isPhone(phone), 'A valid phone number is required.') && ok;
+    ok = validateField('wMessage', 'errWMessage', message.length >= 5, 'Message is required.') && ok;
+    if (!ok) { toast('Please fix the highlighted fields.'); return; }
+    var msg = [
+      'RAVAGE ERA WEBSITE QUERY', '',
+      'Name: ' + name,
+      'Phone: ' + phone,
+      'Message: ' + message
+    ].join('\n');
+    openWa(ZEUS_WA, msg);
+    toast('WhatsApp opened — your query is ready. Press Send.');
+  });
+
+  /* ==========================================================
+     PARTICLES (canvas background)
+     ========================================================== */
+  var fx = $('#fx');
+  if (fx && fx.getContext) {
+    var fctx = fx.getContext('2d');
+    var parts = [], fxW = 0, fxH = 0;
+    var COLORS = ['245,197,66', '226,51,58', '123,63,228'];
+
+    function sizeFx() { fxW = fx.width = window.innerWidth; fxH = fx.height = window.innerHeight; }
+    function makePart() {
+      return {
+        x: Math.random() * fxW, y: Math.random() * fxH,
+        r: Math.random() * 1.8 + 0.6,
+        vx: (Math.random() - 0.5) * 0.28,
+        vy: -(Math.random() * 0.38 + 0.08),
+        a: Math.random() * 0.5 + 0.1,
+        c: COLORS[(Math.random() * COLORS.length) | 0]
+      };
+    }
+    function initParts() {
+      var n = Math.min(50, Math.max(18, Math.floor(fxW * fxH / 24000)));
+      parts = [];
+      for (var i = 0; i < n; i++) parts.push(makePart());
+    }
+    function tick() {
+      fctx.clearRect(0, 0, fxW, fxH);
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.y < -8) { p.y = fxH + 8; p.x = Math.random() * fxW; }
+        if (p.x < -8) p.x = fxW + 8;
+        if (p.x > fxW + 8) p.x = -8;
+        fctx.beginPath();
+        fctx.arc(p.x, p.y, p.r * 3, 0, 6.2832);
+        fctx.fillStyle = 'rgba(' + p.c + ',' + (p.a * 0.18) + ')';
+        fctx.fill();
+        fctx.beginPath();
+        fctx.arc(p.x, p.y, p.r, 0, 6.2832);
+        fctx.fillStyle = 'rgba(' + p.c + ',' + p.a + ')';
+        fctx.fill();
+      }
+      if (!document.hidden) requestAnimationFrame(tick);
+    }
+    if (!reducedMotion) { sizeFx(); initParts(); tick(); }
+    else { fx.style.display = 'none'; }
+    window.addEventListener('resize', function () { sizeFx(); initParts(); });
+  }
+
+  /* ==========================================================
+     INIT
+     ========================================================== */
+  render();
+})();
