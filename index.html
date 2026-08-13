@@ -9,17 +9,15 @@
 </head>
 <body>
 
-<!-- BOOT SCREEN -->
-<div id="boot" class="boot hidden">
+<div id="boot" class="boot">
   <div class="boot-inner">
     <div class="boot-logo">RAVAGE ERA</div>
-    <div class="boot-sub">GUILD HUB OS v2.0</div>
+    <div class="boot-sub">GUILD HUB OS v3.0</div>
     <div id="bootLog" class="boot-log"></div>
     <button id="btnBootSkip" class="btn btn-ghost btn-sm" type="button">SKIP</button>
   </div>
 </div>
 
-<!-- TOP BAR -->
 <header class="topbar">
   <button id="btnMenu" class="hamburger" type="button" aria-label="Menu"><span></span><span></span><span></span></button>
   <div class="brand" data-nav="#/home" role="button" tabindex="0">
@@ -29,7 +27,6 @@
   <div class="top-status"><span class="dot"></span>SYSTEM ONLINE</div>
 </header>
 
-<!-- SIDEBAR -->
 <nav id="sidebar" class="sidebar">
   <ul>
     <li><a href="#/home" class="nav-link">DASHBOARD</a></li>
@@ -44,7 +41,7 @@
     <li><a href="#/contact" class="nav-link">CONTACT</a></li>
     <li><a href="#/faq" class="nav-link">FAQ</a></li>
   </ul>
-  <div class="side-foot">WE STAND UNITED<br><small>v2.0</small></div>
+  <div class="side-foot">WE STAND UNITED<br><small>v3.0</small></div>
 </nav>
 <div id="overlay" class="overlay"></div>
 
@@ -149,19 +146,31 @@
   <!-- ============ SPIN & WIN ============ -->
   <section class="page" id="page-spin">
     <h2 class="page-title">SPIN &amp; WIN</h2>
-    <p class="page-sub">RAVAGE ERA community promotion — reward: <b>GUN SKIN</b> or <b>NOTHING</b>.</p>
+    <p class="page-sub">BOOYAH PASS · PREMIUM PASS · EMOTE · BUNDLES · GUN SKIN · NOTHING</p>
+
+    <div id="spinIntro" class="panel center">
+      <h3 class="panel-title">HOW IT WORKS</h3>
+      <p class="hint">RAVAGE ERA SPIN &amp; WIN is a <b>community promotion</b>, not an official Garena / Free Fire event. The wheel carries 6 prizes. Use your one-time premium code to unlock it, spin once, <b>screenshot your result</b>, then send the receipt (photo + UID + result) to the Web Developer on WhatsApp. Rewards are entered within <b>2 to 5 hours</b>.</p>
+      <div class="btn-row">
+        <button id="btnSpinGo" class="btn btn-gold" type="button">GET STARTED</button>
+      </div>
+    </div>
 
     <div id="spinGate" class="panel center" hidden>
-      <h3 class="panel-title">ACCESS CODE</h3>
+      <h3 class="panel-title">PREMIUM ACCESS</h3>
       <label>UID <input id="spinUid" type="text" inputmode="numeric" placeholder="Your UID"></label>
       <span class="err" id="errSpinUid"></span>
-      <label>SECRET CODE <input id="spinCode" type="password" placeholder="Enter code"></label>
+      <label>PREMIUM CODE <input id="spinCode" type="password" placeholder="XXXX-XXXX"></label>
       <span class="err" id="errSpinCode"></span>
       <div class="pin-help" id="spinPinHelp" hidden>
-        <p>Incorrect code. Contact <b>EMMEX / ZEUS</b> (Web Developer) for the code.</p>
-        <button id="btnSpinPinWa" class="btn btn-red btn-sm" type="button">CONTACT ZEUS ON WHATSAPP</button>
+        <p>Invalid or expired premium code. Codes are one-time use. Contact the owner to get one.</p>
+        <button id="btnSpinPinWa" class="btn btn-red btn-sm" type="button">CONTACT ZEUS WEB DEV</button>
       </div>
-      <button id="btnSpinUnlock" class="btn btn-gold" type="button">UNLOCK WHEEL</button>
+      <div class="btn-row">
+        <button id="btnSpinBackGate" class="btn btn-ghost" type="button">← BACK</button>
+        <button id="btnSpinNoCode" class="btn btn-ghost btn-sm" type="button">DON'T HAVE A CODE?</button>
+        <button id="btnSpinUnlock" class="btn btn-gold" type="button">CONTINUE →</button>
+      </div>
     </div>
 
     <div id="spinWheel" class="panel center" hidden>
@@ -171,55 +180,83 @@
         <div id="wheel" class="wheel"></div>
         <div class="wheel-hub">RE</div>
       </div>
-      <button id="btnSpinStart" class="btn btn-gold" type="button">SPIN</button>
-      <div id="spinOutcome" class="outcome" hidden></div>
+      <button id="btnSpinSpin" class="btn btn-gold" type="button">SPIN</button>
+      <div id="spinOutcome" class="outcome" hidden>
+        <div id="spinOutTitle"></div>
+        <p id="spinOutNote"></p>
+        <button id="btnSpinToReceipt" class="btn btn-gold" type="button">CONTINUE → SCREENSHOT &amp; RECEIPT</button>
+      </div>
     </div>
 
-    <div id="spinClaim" class="panel center" hidden>
-      <h3 class="panel-title">🎉 YOU WON: GUN SKIN</h3>
-      <label>UID <input id="claimUid" type="text" inputmode="numeric" placeholder="Your UID"></label>
-      <span class="err" id="errClaimUid"></span>
-      <label>WIN SCREENSHOT <input id="spinShot" type="file" accept="image/*"></label>
-      <span class="err" id="errSpinShot"></span>
-      <div class="file-row"><span id="spinShotName">Upload Screenshot</span><button id="btnSpinShotClear" class="btn btn-ghost btn-sm" type="button">CLEAR</button></div>
-      <div id="spinShotPreviewWrap" class="preview-wrap" hidden><img id="spinShotPreview" alt="Preview"></div>
-      <div class="btn-row">
-        <button id="btnSpinBack" class="btn btn-ghost" type="button">← BACK</button>
-        <button id="btnSpinClaimNext" class="btn btn-gold" type="button">CONFIRM &amp; CONTINUE</button>
+    <div id="spinReceipt" class="panel center" hidden>
+      <h3 class="panel-title">📸 SCREENSHOT YOUR RESULT</h3>
+      <div class="receipt-box">
+        <div class="receipt-row"><span>UID</span><b id="spinReceiptUid">—</b></div>
+        <div class="receipt-row"><span>RESULT</span><b id="spinReceiptResult">—</b></div>
       </div>
+      <p class="hint">Take a screenshot of your spin result and attach the photo when WhatsApp opens. Your reward is entered within <b>2 to 5 hours</b> after your receipt is submitted.</p>
+      <button id="btnSpinReceipt" class="btn btn-gold" type="button">CONTINUE TO WHATSAPP →</button>
     </div>
   </section>
 
   <!-- ============ LIKES & VISITS ============ -->
   <section class="page" id="page-likes">
     <h2 class="page-title">LIKES &amp; PROFILE VISITS</h2>
-    <p class="page-sub">Minimum <b>10</b> — Maximum <b>100</b> per request.</p>
+    <p class="page-sub">Minimum 10 — Maximum 100 for both</p>
 
-    <div id="likesGate" class="panel center" hidden>
-      <h3 class="panel-title">ACCESS CODE</h3>
-      <label>UID <input id="likesUid" type="text" inputmode="numeric" placeholder="Your UID"></label>
-      <span class="err" id="errLikesUid"></span>
-      <label>SECRET CODE <input id="likesCode" type="password" placeholder="Enter code"></label>
-      <span class="err" id="errLikesCode"></span>
-      <div class="pin-help" id="likesPinHelp" hidden>
-        <p>Incorrect code. Contact <b>EMMEX / ZEUS</b> (Web Developer) for the code.</p>
-        <button id="btnLikesPinWa" class="btn btn-red btn-sm" type="button">CONTACT ZEUS ON WHATSAPP</button>
+    <div id="likesIntro" class="panel center">
+      <h3 class="panel-title">HOW IT WORKS</h3>
+      <p class="hint">RAVAGE ERA LIKES &amp; PROFILE VISITS is a community tool. Use your one-time premium code, choose how many likes (10–100) and profile visits (10–100) you want, <b>screenshot your order</b>, then send the receipt to the Web Developer on WhatsApp. Service is entered within <b>2 to 5 hours</b>.</p>
+      <div class="btn-row">
+        <button id="btnLikesGo" class="btn btn-gold" type="button">GET STARTED</button>
       </div>
-      <button id="btnLikesUnlock" class="btn btn-gold" type="button">UNLOCK</button>
     </div>
 
-    <div id="likesConfirm" class="panel center" hidden>
-      <h3 class="panel-title">SELECT AMOUNT</h3>
-      <div class="amount-wrap">
-        <div class="amount-display"><span id="likesAmount">50</span><small>LIKES / VISITS</small></div>
-        <input id="likesSlider" type="range" min="10" max="100" step="5" value="50" aria-label="Amount">
-        <div class="amount-labels"><span>10 MIN</span><span>100 MAX</span></div>
+    <div id="likesGate" class="panel center" hidden>
+      <h3 class="panel-title">PREMIUM ACCESS</h3>
+      <label>UID <input id="likesUid" type="text" inputmode="numeric" placeholder="Your UID"></label>
+      <span class="err" id="errLikesUid"></span>
+      <label>PREMIUM CODE <input id="likesCode" type="password" placeholder="XXXX-XXXX"></label>
+      <span class="err" id="errLikesCode"></span>
+      <div class="pin-help" id="likesPinHelp" hidden>
+        <p>Invalid or expired premium code. Codes are one-time use. Contact the owner to get one.</p>
+        <button id="btnLikesPinWa" class="btn btn-red btn-sm" type="button">CONTACT ZEUS WEB DEV</button>
+      </div>
+      <div class="btn-row">
+        <button id="btnLikesBack" class="btn btn-ghost" type="button">← BACK</button>
+        <button id="btnLikesNoCode" class="btn btn-ghost btn-sm" type="button">DON'T HAVE A CODE?</button>
+        <button id="btnLikesUnlock" class="btn btn-gold" type="button">CONTINUE →</button>
+      </div>
+    </div>
+
+    <div id="likesChoose" class="panel center" hidden>
+      <h3 class="panel-title">CHOOSE YOUR AMOUNT</h3>
+      <div class="amount-duo">
+        <div class="amount-wrap">
+          <div class="amount-display"><span id="likesAmount">50</span><small>LIKES</small></div>
+          <input id="likesSlider" type="range" min="10" max="100" step="5" value="50" aria-label="Likes amount">
+        </div>
+        <div class="amount-wrap">
+          <div class="amount-display"><span id="visitsAmount">50</span><small>PROFILE VISITS</small></div>
+          <input id="visitsSlider" type="range" min="10" max="100" step="5" value="50" aria-label="Visits amount">
+        </div>
       </div>
       <p class="hint">Target UID: <b id="likesSummaryUid">—</b></p>
       <div class="btn-row">
-        <button id="btnLikesBack" class="btn btn-ghost" type="button">← BACK</button>
-        <button id="btnLikesContinue" class="btn btn-gold" type="button">CONFIRM &amp; CONTINUE</button>
+        <button id="btnLikesBackChoose" class="btn btn-ghost" type="button">← BACK</button>
+        <button id="btnLikesNext" class="btn btn-gold" type="button">CONTINUE →</button>
       </div>
+    </div>
+
+    <div id="likesReceipt" class="panel center" hidden>
+      <h3 class="panel-title">📸 SCREENSHOT YOUR ORDER</h3>
+      <div class="receipt-box">
+        <div class="receipt-row"><span>UID</span><b id="likesReceiptUid">—</b></div>
+        <div class="receipt-row"><span>LIKES</span><b id="likesReceiptLikes">—</b></div>
+        <div class="receipt-row"><span>PROFILE VISITS</span><b id="likesReceiptVisits">—</b></div>
+      </div>
+      <p class="hint">Take a screenshot of your order and attach the photo when WhatsApp opens. Service is entered within <b>2 to 5 hours</b> after your receipt is submitted.</p>
+      <button id="btnLikesReceipt" class="btn btn-gold" type="button">CONTINUE TO WHATSAPP →</button>
     </div>
   </section>
 
@@ -233,7 +270,6 @@
       <h3 class="panel-title">SELECT YOUR PHONE TYPE</h3>
       <div id="phoneGrid" class="phone-grid"></div>
     </div>
-
     <div id="sensiStep2" class="panel" hidden>
       <h3 class="panel-title">ENTER YOUR PHONE FULL NAME</h3>
       <label>FULL PHONE NAME <input id="sensiPhone" type="text" placeholder="e.g. iPhone 13 Pro Max / Tecno Camon 20"></label>
@@ -243,31 +279,28 @@
         <button id="btnSensiNext3" class="btn btn-gold" type="button">CONTINUE →</button>
       </div>
     </div>
-
     <div id="sensiStep3" class="panel" hidden>
       <h3 class="panel-title">HOW MANY FINGERS DO YOU USE?</h3>
       <div id="fingerOptions" class="opt-row"></div>
     </div>
-
     <div id="sensiStep4" class="panel" hidden>
       <h3 class="panel-title">SELECT YOUR DPI</h3>
       <div id="dpiOptions" class="opt-row"></div>
     </div>
-
     <div id="sensiStep5" class="panel center" hidden>
       <h3 class="panel-title">ENTER PIN</h3>
       <label>PIN <input id="sensiPin" type="password" inputmode="numeric" placeholder="••••••"></label>
       <span class="err" id="errSensiPin"></span>
       <div class="pin-help" id="sensiPinHelp" hidden>
-        <p>Incorrect PIN. Contact <b>EMMEX / ZEUS</b> (Owner) for the PIN.</p>
+        <p>Incorrect or expired PIN. PINs are one-time use. Contact the owner to get one.</p>
         <button id="btnSensiPinWa" class="btn btn-red btn-sm" type="button">CONTACT OWNER FOR PIN</button>
       </div>
       <div class="btn-row">
         <button class="btn btn-ghost" data-sback="4" type="button">← BACK</button>
+        <button id="btnSensiPinAsk" class="btn btn-ghost btn-sm" type="button">DON'T HAVE THE PIN?</button>
         <button id="btnSensiGenerate" class="btn btn-gold" type="button">GENERATE SENSI</button>
       </div>
     </div>
-
     <div id="sensiResult" class="panel" hidden>
       <h3 class="panel-title">✅ YOUR FULL SENSI</h3>
       <div class="sensi-card">
@@ -385,35 +418,10 @@
   <p><a href="https://wa.me/2349066760078" target="_blank" rel="noopener">WhatsApp: 09066760078</a> · <a href="mailto:ge5853987@gmail.com">ge5853987@gmail.com</a></p>
 </footer>
 
-<!-- MODALS -->
 <div id="modalTryoutSuccess" class="modal" hidden><div class="modal-card">
   <h3>APPLICATION SENT ✅</h3>
   <p>Your application has been prepared and sent to the selected admin on WhatsApp. An admin will review it. <b>We Stand United.</b></p>
   <div class="btn-row"><button id="btnTryoutClose" class="btn btn-ghost" type="button">CLOSE</button><button id="btnTryoutViewGuild" class="btn btn-gold" type="button">VIEW GUILD</button></div>
-</div></div>
-
-<div id="modalSpinProcess" class="modal" hidden><div class="modal-card">
-  <h3>⏳ PROCESSING</h3>
-  <p>Your reward <b>(GUN SKIN)</b> will be entered into your account within <b>2 to 5 hours</b>. Keep your WhatsApp notifications on.</p>
-  <div class="btn-row"><button id="btnSpinProcessOk" class="btn btn-gold" type="button">OK — GOT IT</button></div>
-</div></div>
-
-<div id="modalSpinThanks" class="modal" hidden><div class="modal-card">
-  <h3>🎉 THANK YOU, WARRIOR!</h3>
-  <p>Your Spin &amp; Win claim is confirmed. We Stand United!</p>
-  <div class="btn-row"><button id="btnSpinThanksClose" class="btn btn-gold" type="button">BOOYAH!</button></div>
-</div></div>
-
-<div id="modalLikesProcess" class="modal" hidden><div class="modal-card">
-  <h3>⏳ PROCESSING</h3>
-  <p>Your <b id="likesProcessAmount">50</b> likes / profile visits will be entered within <b>2 to 5 hours</b>. Keep your WhatsApp notifications on.</p>
-  <div class="btn-row"><button id="btnLikesProcessOk" class="btn btn-gold" type="button">OK — GOT IT</button></div>
-</div></div>
-
-<div id="modalLikesThanks" class="modal" hidden><div class="modal-card">
-  <h3>🙏 THANK YOU!</h3>
-  <p>Your request has been submitted. We Stand United!</p>
-  <div class="btn-row"><button id="btnLikesThanksClose" class="btn btn-gold" type="button">BOOYAH!</button></div>
 </div></div>
 
 <div id="modalGallery" class="modal" hidden><div class="modal-card modal-img">
