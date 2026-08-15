@@ -27,18 +27,29 @@ window.RE_PINS = {
     'SENSI-G1H5'
   ],
 
-  /* ----- SPIN & WIN CODES (10) ----- */
+  /* ----- SPIN & WIN CODES (20) ----- 
+     4500+ POINTS AUTO QUALIFY + BONUS SLOTS */
   SPIN: [
-    'SPIN-A4K7',
-    'SPIN-R2Q9',
-    'SPIN-T8M3',
-    'SPIN-P5X1',
-    'SPIN-N7Z6',
-    'SPIN-W9L2',
-    'SPIN-C3V8',
-    'SPIN-Y1B4',
-    'SPIN-F6J0',
-    'SPIN-E0D5'
+    'SPIN-LORD-4501',   // RE LORD
+    'SPIN-ZEUS-4502',   // RE ZEUS
+    'SPIN-CRIM-4503',   // RE CRIMINAL
+    'SPIN-EVIL-4700',   // NH EVIL
+    'SPIN-BRIT-4505',   // RE BRITON
+    'SPIN-DRAC-4506',   // DRACO
+    'SPIN-MARP-4507',   // MARPHY
+    'SPIN-HAPX-4508',   // HAPEX
+    'SPIN-DANY-4509',   // RE DANNY
+    'SPIN-BONUS-4510',
+    'SPIN-BONUS-4511',
+    'SPIN-BONUS-4512',
+    'SPIN-BONUS-4513',
+    'SPIN-BONUS-4514',
+    'SPIN-BONUS-4515',
+    'SPIN-BONUS-4516',
+    'SPIN-BONUS-4517',
+    'SPIN-BONUS-4518',
+    'SPIN-BONUS-4519',
+    'SPIN-BONUS-4520'
   ],
 
   /* ----- LIKES & VISITS CODES (10) ----- */
