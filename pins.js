@@ -11,58 +11,78 @@
    ============================================================ */
 window.RE_PINS = {
 
-  MASTER: ['ZEUS-MASTER-006', 'ZEUS-MASTER-007', 'ZEUS-MASTER-008', 'ZEUS-MASTER-009', 'ZEUS-MASTER-010'],   // owner master codes — never expires
+  MASTER: ['ZEUS-MASTER-011', 'ZEUS-MASTER-012', 'ZEUS-MASTER-013', 'ZEUS-MASTER-014', 'ZEUS-MASTER-015'],   // owner master codes — never expires
 
-  /* ----- SENSI CODES (10) ----- */
+  /* ----- SENSI CODES (20) ----- */
   SENSI: [
-    'SENSI-A2K8',
-    'SENSI-P4Q6',
-    'SENSI-N7W3',
-    'SENSI-R1T9',
-    'SENSI-F5L0',
-    'SENSI-M9Z2',
-    'SENSI-C3B7',
-    'SENSI-J8Y1',
-    'SENSI-D4V6',
-    'SENSI-G0H5'
+    'SENSI-A1B2',
+    'SENSI-C3D4',
+    'SENSI-E5F6',
+    'SENSI-G7H8',
+    'SENSI-J9K0',
+    'SENSI-L1M2',
+    'SENSI-N3P4',
+    'SENSI-Q5R6',
+    'SENSI-S7T8',
+    'SENSI-U9V0',
+    'SENSI-W1X2',
+    'SENSI-Y3Z4',
+    'SENSI-2A5B',
+    'SENSI-6C7D',
+    'SENSI-8E9F',
+    'SENSI-0G1H',
+    'SENSI-2J3K',
+    'SENSI-4L5M',
+    'SENSI-6N7P',
+    'SENSI-8Q9R'
   ],
 
   /* ----- SPIN & WIN CODES (20) ----- 
      4500+ POINTS AUTO QUALIFY + BONUS SLOTS */
   SPIN: [
-    'SPIN-KING-4521',   // RE KING
-    'SPIN-THOR-4522',   // RE THOR
-    'SPIN-VIPR-4523',   // RE VIPER
-    'SPIN-SHADOW-4524', // NH SHADOW
-    'SPIN-PHOE-4525',   // RE PHOENIX
-    'SPIN-TITN-4526',   // TITAN
-    'SPIN-NOVA-4527',   // NOVA
-    'SPIN-FURY-4528',   // FURY
-    'SPIN-OMEGA-4529',  // RE OMEGA
-    'SPIN-BONUS-4530',
-    'SPIN-BONUS-4531',
-    'SPIN-BONUS-4532',
-    'SPIN-BONUS-4533',
-    'SPIN-BONUS-4534',
-    'SPIN-BONUS-4535',
-    'SPIN-BONUS-4536',
-    'SPIN-BONUS-4537',
-    'SPIN-BONUS-4538',
-    'SPIN-BONUS-4539',
-    'SPIN-BONUS-4540'
+    'SPIN-LORD-4541',   // RE LORD
+    'SPIN-ZEUS-4542',   // RE ZEUS
+    'SPIN-CRIM-4543',   // RE CRIMINAL
+    'SPIN-EVIL-4544',   // NH EVIL
+    'SPIN-BRIT-4545',   // RE BRITON
+    'SPIN-DRAC-4546',   // DRACO
+    'SPIN-MARP-4547',   // MARPHY
+    'SPIN-HAPX-4548',   // HAPEX
+    'SPIN-DANY-4549',   // RE DANNY
+    'SPIN-KING-4550',   // RE KING
+    'SPIN-BONUS-4551',
+    'SPIN-BONUS-4552',
+    'SPIN-BONUS-4553',
+    'SPIN-BONUS-4554',
+    'SPIN-BONUS-4555',
+    'SPIN-BONUS-4556',
+    'SPIN-BONUS-4557',
+    'SPIN-BONUS-4558',
+    'SPIN-BONUS-4559',
+    'SPIN-BONUS-4560'
   ],
 
-  /* ----- LIKES & VISITS CODES (10) ----- */
+  /* ----- LIKES & VISITS CODES (20) ----- */
   LIKES: [
-    'LIKES-A9P4',
-    'LIKES-R2M7',
-    'LIKES-T8Q1',
-    'LIKES-W3K6',
-    'LIKES-E5N0',
-    'LIKES-S1Y8',
-    'LIKES-L6B2',
-    'LIKES-U7C9',
-    'LIKES-Z4F3',
-    'LIKES-X0D5'
+    'LIKES-A1B2',
+    'LIKES-C3D4',
+    'LIKES-E5F6',
+    'LIKES-G7H8',
+    'LIKES-J9K0',
+    'LIKES-L1M2',
+    'LIKES-N3P4',
+    'LIKES-Q5R6',
+    'LIKES-S7T8',
+    'LIKES-U9V0',
+    'LIKES-W1X2',
+    'LIKES-Y3Z4',
+    'LIKES-2A5B',
+    'LIKES-6C7D',
+    'LIKES-8E9F',
+    'LIKES-0G1H',
+    'LIKES-2J3K',
+    'LIKES-4L5M',
+    'LIKES-6N7P',
+    'LIKES-8Q9R'
   ]
 };
